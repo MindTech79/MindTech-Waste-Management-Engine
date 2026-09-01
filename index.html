@@ -1,2025 +1,1206 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>MindTech Waste Management Engine</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MindTech Waste Management Engine</title>
+  
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  
+  <!-- Exo 2 Font & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
-    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <!-- Particles.js for Quantum Background -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/particles.js/2.0.0/particles.min.js"></script>
 
-    <!-- Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    :root {
+      --bg-dark: #090d16;
+      --card-bg: rgba(15, 23, 42, 0.75);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --input-bg: rgba(30, 41, 59, 0.6);
+      --input-border: rgba(255, 255, 255, 0.12);
+      
+      --accent-cyan: #38bdf8;
+      --accent-blue: #0284c7;
+      --accent-green: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --accent-purple: #8B5CF6;
+      
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      
+      --radius-lg: 20px;
+      --radius-md: 12px;
+      --radius-sm: 8px;
+      --shadow-glow: 0 20px 50px rgba(2, 132, 199, 0.15);
+    }
 
-    <style>
-        /* ============================================================
-           ROOT VARIABLES & RESET
-           ============================================================ */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        :root {
-            --primary: #00B4D8;
-            --primary-dark: #0096C7;
-            --secondary: #00F5D4;
-            --quantum: #8A2BE2;
-            --quantum-glow: rgba(138,43,226,0.3);
-            --success: #00FF88;
-            --danger: #EF476F;
-            --gold: #FFD700;
-            --dark-bg: #05080F;
-            --dark-card: #0A0F1A;
-            --glass-border: rgba(0,180,216,0.15);
-            --glass-border-light: rgba(0,180,216,0.08);
-            --text-primary: #E8EDF5;
-            --text-secondary: #8A99B0;
-            --text-muted: #4A5A6A;
-            --font-exo: 'Exo 2', sans-serif;
-            --font-mono: 'Space Mono', monospace;
-            --pelo-green: #1B4D3D;
-            --pelo-gold: #C8A450;
-            --pelo-gold-glow: rgba(200,164,80,0.15);
-        }
-        body {
-            font-family: var(--font-exo);
-            background: var(--dark-bg);
-            color: var(--text-primary);
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 16px;
-            position: relative;
-            z-index: 1;
-        }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
-        /* ============================================================
-           LOGIN OVERLAY & MODALS
-           ============================================================ */
-        #loginOverlay,
-        #registerModal,
-        #collectorRegisterModal,
-        #appContainer {
-            transition: opacity 0.4s ease, visibility 0.4s ease;
-        }
-        #loginOverlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(5,8,15,0.97);
-            backdrop-filter: blur(28px);
-            -webkit-backdrop-filter: blur(28px);
-            z-index: 9999;
-            display: flex !important;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            flex-direction: column;
-            opacity: 1;
-            visibility: visible;
-            pointer-events: auto;
-        }
-        #loginOverlay.hidden {
-            opacity: 0;
-            visibility: hidden;
-            pointer-events: none;
-        }
-        #registerModal,
-        #collectorRegisterModal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(5,8,15,0.95);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            z-index: 10000;
-            display: flex !important;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            opacity: 0;
-            visibility: hidden;
-            pointer-events: none;
-        }
-        #registerModal.visible,
-        #collectorRegisterModal.visible {
-            opacity: 1;
-            visibility: visible;
-            pointer-events: auto;
-        }
-        #appContainer {
-            display: block !important;
-            opacity: 0;
-            visibility: hidden;
-            pointer-events: none;
-        }
-        #appContainer.visible {
-            opacity: 1;
-            visibility: visible;
-            pointer-events: auto;
-        }
+    body {
+      font-family: 'Exo 2', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-dark);
+      margin: 0;
+      padding: 30px 15px;
+      color: var(--text-primary);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
 
-        /* ============================================================
-           COMMUNITY SECTION
-           ============================================================ */
-        #communitySection { display: none; }
-        #communitySection.visible { display: block; }
+    /* ===== PARTICLES BACKGROUND ===== */
+    #particles-js {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
 
-        /* ============================================================
-           BUTTONS & CARDS
-           ============================================================ */
-        @keyframes glassPulse {
-            0% { border-color: rgba(0,180,216,0.2); box-shadow: 0 0 0 0 rgba(0,180,216,0.05); }
-            50% { border-color: rgba(200,164,80,0.3); box-shadow: 0 0 40px 5px var(--pelo-gold-glow); }
-            100% { border-color: rgba(0,180,216,0.2); box-shadow: 0 0 0 0 rgba(0,180,216,0.05); }
-        }
-        .login-card {
-            max-width: 440px;
-            width: 100%;
-            padding: 40px 32px;
-            text-align: center;
-            background: rgba(15,25,45,0.45);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
-            border: 1px solid var(--glass-border);
-            border-radius: 28px;
-            box-shadow: 0 8px 60px rgba(0,0,0,0.4);
-            animation: glassPulse 4s ease-in-out infinite;
-        }
-        .login-logo {
-            max-width: 200px;
-            width: 100%;
-            margin-bottom: 16px;
-            filter: drop-shadow(0 0 30px var(--pelo-gold-glow));
-            display: block;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        .login-title {
-            font-size: 1.6rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, var(--pelo-gold), var(--pelo-green));
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            margin-bottom: 4px;
-        }
-        .login-subtitle {
-            font-size: 0.7rem;
-            color: var(--text-secondary);
-            margin-bottom: 20px;
-            font-family: var(--font-mono);
-            letter-spacing: 2px;
-        }
-        .login-divider {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin: 16px 0;
-            color: var(--text-muted);
-            font-size: 0.6rem;
-        }
-        .login-divider::before,
-        .login-divider::after {
-            content: "";
-            flex: 1;
-            height: 1px;
-            background: var(--glass-border);
-        }
-        .login-error {
-            color: var(--danger);
-            font-size: 0.75rem;
-            margin-top: 10px;
-            min-height: 20px;
-        }
-        .btn-login {
-            width: 100%;
-            padding: 14px;
-            border: none;
-            border-radius: 60px;
-            font-size: 0.9rem;
-            font-weight: 700;
-            cursor: pointer;
-            font-family: var(--font-exo);
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            margin-top: 12px;
-        }
-        .btn-login:hover {
-            transform: translateY(-2px);
-            filter: brightness(1.05);
-        }
-        .btn-google {
-            background: #4285F4;
-            color: white;
-            box-shadow: 0 4px 15px rgba(66,133,244,0.3);
-        }
-        .btn-google:hover { box-shadow: 0 8px 25px rgba(66,133,244,0.5); }
-        .btn-demo {
-            background: linear-gradient(135deg, var(--pelo-gold), var(--pelo-green));
-            color: white;
-            box-shadow: 0 4px 15px rgba(200,164,80,0.3);
-        }
-        .btn-demo:hover { box-shadow: 0 8px 25px rgba(200,164,80,0.5); }
-        .btn-register {
-            background: rgba(255,255,255,0.06);
-            color: var(--text-primary);
-            border: 1px solid var(--glass-border);
-        }
-        .btn-register:hover {
-            background: rgba(255,255,255,0.12);
-            border-color: var(--pelo-gold);
-        }
-        .btn-logout {
-            background: rgba(239,71,111,0.15);
-            border: 1px solid rgba(239,71,111,0.2);
-            color: var(--danger);
-            padding: 6px 14px;
-            border-radius: 30px;
-            cursor: pointer;
-            font-family: var(--font-exo);
-            font-size: 0.6rem;
-            transition: all 0.3s;
-        }
-        .btn-logout:hover { background: rgba(239,71,111,0.25); }
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      padding: 40px;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-glow);
+      border: 1px solid var(--card-border);
+      position: relative;
+      z-index: 1;
+    }
 
-        /* ============================================================
-           HEADER
-           ============================================================ */
-        .header {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            padding: 16px 20px;
-            background: rgba(15,25,45,0.35);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-        .header-logo {
-            height: 52px;
-            width: auto;
-            filter: drop-shadow(0 0 20px var(--pelo-gold-glow));
-            flex-shrink: 0;
-        }
-        .header-text {
-            flex: 1;
-        }
-        .header-text h1 {
-            font-size: 1.1rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, var(--pelo-gold), var(--pelo-green));
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-        .header-text p {
-            font-size: 0.5rem;
-            color: var(--text-secondary);
-            letter-spacing: 2px;
-            font-family: var(--font-mono);
-        }
-        .header-badge {
-            font-size: 0.55rem;
-            background: rgba(0,255,136,0.06);
-            border: 1px solid rgba(0,255,136,0.1);
-            border-radius: 20px;
-            padding: 4px 14px;
-            color: var(--success);
-            font-family: var(--font-mono);
-            white-space: nowrap;
-            flex-shrink: 0;
-        }
-        .header-user {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 0.65rem;
-            color: var(--text-secondary);
-            flex-wrap: wrap;
-        }
-        .btn-collector-register {
-            background: linear-gradient(135deg, var(--pelo-green), var(--pelo-gold));
-            border: none;
-            color: white;
-            padding: 6px 16px;
-            border-radius: 30px;
-            font-size: 0.6rem;
-            font-weight: 700;
-            cursor: pointer;
-            font-family: var(--font-exo);
-            transition: all 0.3s;
-            white-space: nowrap;
-        }
-        .btn-collector-register:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 20px rgba(200,164,80,0.3);
-        }
+    /* ===== BRAND HEADER ===== */
+    .brand-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--card-border);
+      flex-wrap: wrap;
+      gap: 15px;
+    }
 
-        /* ============================================================
-           GLASS CARD
-           ============================================================ */
-        .glass-card {
-            background: rgba(15,25,45,0.30);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            padding: 24px;
-            margin-bottom: 20px;
-            transition: all 0.3s ease;
-        }
-        .glass-card:hover { border-color: var(--pelo-gold); }
-        .card-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 16px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid var(--glass-border);
-            flex-wrap: wrap;
-        }
-        .card-header i { font-size: 1.3rem; color: var(--pelo-gold); }
-        .card-header h3 { font-size: 1rem; font-weight: 600; }
-        .card-header .count-badge {
-            margin-left: auto;
-            font-size: 0.6rem;
-            background: rgba(0,180,216,0.08);
-            padding: 2px 12px;
-            border-radius: 20px;
-            color: var(--text-secondary);
-        }
+    .brand-logo-area {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
 
-        /* ============================================================
-           FORM
-           ============================================================ */
-        .form-group { margin-bottom: 14px; }
-        .form-group label {
-            display: block;
-            margin-bottom: 4px;
-            font-size: 0.6rem;
-            color: var(--text-secondary);
-            font-weight: 600;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-        }
-        .form-group label .required { color: var(--danger); }
-        .form-group label .optional {
-            color: var(--text-muted);
-            font-weight: 400;
-            text-transform: none;
-            font-size: 0.55rem;
-        }
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 10px 14px;
-            background: rgba(0,0,0,0.25);
-            border: 1px solid var(--glass-border);
-            border-radius: 14px;
-            color: var(--text-primary);
-            font-size: 0.85rem;
-            transition: all 0.3s;
-            font-family: var(--font-exo);
-        }
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: var(--pelo-gold);
-            box-shadow: 0 0 0 3px rgba(200,164,80,0.04);
-        }
-        .form-group textarea { resize: vertical; min-height: 60px; }
-        .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-        .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
-        .form-row-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 14px; }
-        .form-section-title {
-            font-size: 0.7rem;
-            font-weight: 700;
-            color: var(--pelo-gold);
-            margin: 10px 0 12px;
-            padding-bottom: 6px;
-            border-bottom: 1px solid rgba(200,164,80,0.08);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .form-section-title i { font-size: 0.9rem; }
+    .brand-logo {
+      height: 48px;
+      width: auto;
+      filter: drop-shadow(0 0 20px rgba(2, 132, 199, 0.2));
+      transition: all 0.3s ease;
+    }
 
-        /* ============================================================
-           MAP
-           ============================================================ */
-        #map {
-            width: 100%;
-            height: 260px;
-            border-radius: 14px;
-            overflow: hidden;
-            border: 1px solid var(--glass-border);
-            margin: 10px 0 14px;
-            background: #0A0F1A;
-        }
-        #map .leaflet-control-attribution {
-            background: rgba(5,8,15,0.8);
-            color: var(--text-secondary);
-            font-size: 0.45rem;
-        }
-        .map-hint {
-            font-size: 0.6rem;
-            color: var(--text-secondary);
-            text-align: center;
-            margin-top: 4px;
-        }
-        .map-hint i { color: var(--pelo-gold); }
+    .brand-logo:hover {
+      filter: drop-shadow(0 0 30px rgba(2, 132, 199, 0.4));
+    }
 
-        /* ============================================================
-           BUTTONS
-           ============================================================ */
-        .btn-primary {
-            width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, var(--pelo-green), var(--pelo-gold));
-            border: none;
-            border-radius: 60px;
-            color: white;
-            font-weight: 700;
-            cursor: pointer;
-            font-family: var(--font-exo);
-            font-size: 0.9rem;
-            transition: transform 0.2s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-        .btn-primary:hover { transform: scale(1.01); }
-        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-        .btn-secondary {
-            padding: 8px 16px;
-            background: rgba(0,0,0,0.2);
-            border: 1px solid var(--glass-border);
-            border-radius: 30px;
-            color: var(--text-secondary);
-            cursor: pointer;
-            font-family: var(--font-exo);
-            font-size: 0.65rem;
-            transition: all 0.3s;
-        }
-        .btn-secondary:hover { border-color: var(--pelo-gold); color: var(--text-primary); }
-        .btn-danger {
-            padding: 4px 12px;
-            background: rgba(239,71,111,0.12);
-            border: 1px solid rgba(239,71,111,0.15);
-            border-radius: 20px;
-            color: var(--danger);
-            cursor: pointer;
-            font-family: var(--font-exo);
-            font-size: 0.55rem;
-            transition: all 0.3s;
-        }
-        .btn-danger:hover { background: rgba(239,71,111,0.25); }
+    .brand-text h1 {
+      font-size: 22px;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #ffffff, var(--accent-cyan), var(--accent-purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-family: 'Exo 2', sans-serif;
+    }
 
-        /* ============================================================
-           ENTRIES
-           ============================================================ */
-        .entries-list {
-            margin-top: 12px;
-            max-height: 300px;
-            overflow-y: auto;
-        }
-        .entry-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 14px;
-            background: rgba(0,0,0,0.12);
-            border-radius: 12px;
-            margin-bottom: 6px;
-            border-left: 3px solid var(--pelo-gold);
-            font-size: 0.75rem;
-            flex-wrap: wrap;
-            gap: 6px;
-        }
-        .entry-item .entry-info {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-            flex: 1;
-        }
-        .entry-item .entry-info .name { font-weight: 600; color: var(--text-primary); }
-        .entry-item .entry-info .details { font-size: 0.6rem; color: var(--text-secondary); }
-        .entry-item .entry-info .location { font-size: 0.55rem; color: var(--text-muted); font-family: var(--font-mono); }
-        .entry-item .entry-actions { display: flex; gap: 6px; align-items: center; }
-        .entry-item .entry-status {
-            font-size: 0.45rem;
-            padding: 2px 10px;
-            border-radius: 20px;
-            background: rgba(0,255,136,0.06);
-            color: var(--success);
-            font-family: var(--font-mono);
-        }
+    .brand-text .subtitle {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      font-family: 'Exo 2', sans-serif;
+    }
 
-        /* ============================================================
-           OFFLINE
-           ============================================================ */
-        .offline-indicator {
-            display: none;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 14px;
-            background: rgba(255,215,0,0.06);
-            border: 1px solid rgba(255,215,0,0.1);
-            border-radius: 12px;
-            font-size: 0.65rem;
-            color: var(--gold);
-            margin-bottom: 12px;
-        }
-        .offline-indicator.visible { display: flex; }
-        .offline-indicator i { font-size: 0.9rem; }
+    .header-badges {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
 
-        /* ============================================================
-           TOAST
-           ============================================================ */
-        .toast {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(10,18,35,0.92);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 16px;
-            padding: 14px 28px;
-            color: var(--text-primary);
-            z-index: 99999;
-            box-shadow: 0 8px 50px rgba(0,0,0,0.5);
-            font-family: var(--font-exo);
-            font-size: 0.8rem;
-            max-width: 90%;
-            text-align: center;
-            animation: toastIn 0.3s ease;
-        }
-        @keyframes toastIn {
-            from { opacity: 0; transform: translateX(-50%) translateY(20px); }
-            to { opacity: 1; transform: translateX(-50%) translateY(0); }
-        }
+    .badge-pelo, .badge-quantum, .badge-live {
+      padding: 6px 14px;
+      border-radius: 30px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
 
-        /* ============================================================
-           FOOTER
-           ============================================================ */
-        .footer {
-            text-align: center;
-            padding: 20px 20px 10px;
-            margin-top: 20px;
-            border-top: 1px solid var(--glass-border);
-        }
-        .footer-logos {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 30px;
-            flex-wrap: wrap;
-            margin-bottom: 12px;
-        }
-        .footer-logo {
-            height: 40px;
-            width: auto;
-            opacity: 0.7;
-            transition: all 0.3s;
-            filter: drop-shadow(0 0 8px rgba(0,180,216,0.05));
-            object-fit: contain;
-        }
-        .footer-logo:hover {
-            opacity: 1;
-            transform: scale(1.05);
-            filter: drop-shadow(0 0 12px rgba(0,180,216,0.15));
-        }
-        .quantum-line {
-            font-family: var(--font-mono);
-            font-size: 0.5rem;
-            color: var(--text-muted);
-            letter-spacing: 2px;
-            opacity: 0.4;
-        }
-        .footer .copyright {
-            font-size: 0.5rem;
-            color: var(--text-secondary);
-            margin-top: 4px;
-        }
+    .badge-pelo {
+      background: rgba(2, 132, 199, 0.15);
+      color: var(--accent-cyan);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      font-family: 'Exo 2', sans-serif;
+    }
 
-        /* ============================================================
-           IMPACT STATS
-           ============================================================ */
-        .impact-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-        .impact-card {
-            background: rgba(0,0,0,0.15);
-            border-radius: 14px;
-            padding: 12px;
-            text-align: center;
-            border: 1px solid var(--glass-border);
-        }
-        .impact-card .value {
-            font-size: 1.4rem;
-            font-weight: 800;
-        }
-        .impact-card .label {
-            font-size: 0.5rem;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        .impact-card .value.gold { color: var(--pelo-gold); }
-        .impact-card .value.green { color: var(--success); }
-        .impact-card .value.cyan { color: var(--secondary); }
-        .impact-card .value.primary { color: var(--primary); }
+    .badge-quantum {
+      background: rgba(139, 92, 246, 0.15);
+      color: var(--accent-purple);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      font-family: 'JetBrains Mono', monospace;
+    }
 
-        /* ============================================================
-           NOTICE BOARD
-           ============================================================ */
-        .notice-board {
-            margin-top: 20px;
-            padding: 16px;
-            background: rgba(0,0,0,0.10);
-            border-radius: 14px;
-            border: 1px dashed rgba(200,164,80,0.15);
-        }
-        .notice-board .notice-header {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-        .notice-board .notice-header i { color: var(--pelo-gold); font-size: 1rem; }
-        .notice-board .notice-header span {
-            font-size: 0.7rem;
-            font-weight: 700;
-            color: var(--pelo-gold);
-        }
-        .notice-board .notice-header .badge {
-            font-size: 0.45rem;
-            color: var(--text-muted);
-            background: rgba(0,0,0,0.2);
-            padding: 2px 10px;
-            border-radius: 20px;
-            margin-left: auto;
-        }
-        .notice-content {
-            font-size: 0.65rem;
-            color: var(--text-secondary);
-            max-height: 80px;
-            overflow-y: auto;
-        }
-        .notice-content p { margin-bottom: 4px; }
-        .notice-content strong { color: var(--text-primary); }
+    .badge-live {
+      background: rgba(244, 63, 94, 0.15);
+      color: var(--accent-rose);
+      border: 1px solid rgba(244, 63, 94, 0.3);
+      font-family: 'Exo 2', sans-serif;
+    }
 
-        /* ============================================================
-           RESPONSIVE
-           ============================================================ */
-        @media (max-width: 768px) {
-            .container { padding: 10px; }
-            .form-row-2 { grid-template-columns: 1fr; }
-            .form-row-3 { grid-template-columns: 1fr 1fr; }
-            .form-row-4 { grid-template-columns: 1fr 1fr; }
-            .impact-grid { grid-template-columns: 1fr 1fr; }
-            .header { flex-wrap: wrap; }
-            .header-badge { margin-left: 0; }
-            .glass-card { padding: 16px; }
-            #map { height: 200px; }
-            .entry-item { flex-wrap: wrap; gap: 6px; }
-            .header-logo { height: 40px; }
-            .footer-logo { height: 32px; }
-            .login-card { padding: 28px 20px; }
-            .login-logo { max-width: 150px; }
-        }
-        @media (max-width: 480px) {
-            .form-row-3 { grid-template-columns: 1fr; }
-            .form-row-4 { grid-template-columns: 1fr; }
-            .impact-grid { grid-template-columns: 1fr 1fr; }
-            .header-logo { height: 36px; }
-            .header-text h1 { font-size: 0.9rem; }
-            .header-badge { font-size: 0.45rem; padding: 2px 10px; }
-            .login-title { font-size: 1.3rem; }
-            .footer-logo { height: 28px; }
-            .footer-logos { gap: 16px; }
-        }
-    </style>
+    /* ===== NAV TABS ===== */
+    .nav-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 25px;
+      background: rgba(15, 23, 42, 0.6);
+      padding: 6px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--card-border);
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 12px 16px;
+      border: none;
+      background: transparent;
+      font-weight: 700;
+      cursor: pointer;
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      transition: all 0.25s ease;
+      font-size: 13px;
+      min-width: 140px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-family: 'Exo 2', sans-serif;
+    }
+
+    .tab-btn.active {
+      background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+    }
+
+    .tab-btn:hover:not(.active) {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-primary);
+    }
+
+    /* ===== SECTIONS & FORMS ===== */
+    .section-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-top: 30px;
+      margin-bottom: 18px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-family: 'Exo 2', sans-serif;
+    }
+
+    .section-title .count {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-transform: none;
+      margin-left: auto;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 18px;
+    }
+
+    @media (max-width: 680px) {
+      .form-grid { grid-template-columns: 1fr; }
+      .container { padding: 20px 15px; }
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    .form-group.full-width {
+      grid-column: span 2;
+    }
+
+    @media (max-width: 680px) {
+      .form-group.full-width { grid-column: span 1; }
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 8px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-family: 'Exo 2', sans-serif;
+    }
+
+    label .required {
+      color: var(--accent-rose);
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid var(--input-border);
+      border-radius: var(--radius-sm);
+      box-sizing: border-box;
+      font-size: 14px;
+      color: var(--text-primary);
+      background: var(--input-bg);
+      transition: all 0.2s ease;
+      font-family: 'Exo 2', sans-serif;
+    }
+
+    select option {
+      background: #0f172a;
+      color: #ffffff;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+      background: rgba(30, 41, 59, 0.9);
+    }
+
+    #map {
+      height: 260px;
+      width: 100%;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--input-border);
+      margin-top: 8px;
+      overflow: hidden;
+    }
+
+    /* ===== BUTTONS ===== */
+    .btn-submit {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+      color: #ffffff;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-weight: 700;
+      font-size: 15px;
+      cursor: pointer;
+      margin-top: 20px;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-family: 'Exo 2', sans-serif;
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
+    }
+
+    .btn-demo {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--accent-cyan);
+      border: 1px dashed rgba(56, 189, 248, 0.4);
+      padding: 12px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 25px;
+      width: 100%;
+      transition: all 0.2s ease;
+      font-family: 'Exo 2', sans-serif;
+    }
+
+    .btn-demo:hover {
+      background: rgba(56, 189, 248, 0.1);
+    }
+
+    .action-bar {
+      display: flex;
+      gap: 12px;
+      margin-top: 30px;
+      margin-bottom: 15px;
+    }
+
+    .btn-export, .btn-clear {
+      flex: 1;
+      padding: 10px 16px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border: none;
+      font-family: 'Exo 2', sans-serif;
+    }
+
+    .btn-export {
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--accent-green);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-export:hover {
+      background: rgba(16, 185, 129, 0.25);
+    }
+
+    .btn-clear {
+      background: rgba(244, 63, 94, 0.15);
+      color: var(--accent-rose);
+      border: 1px solid rgba(244, 63, 94, 0.3);
+    }
+
+    .btn-clear:hover {
+      background: rgba(244, 63, 94, 0.25);
+    }
+
+    /* ===== STATS PANEL ===== */
+    .stats-panel {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 15px;
+      background: rgba(15, 23, 42, 0.8);
+      padding: 20px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--card-border);
+      margin-top: 30px;
+      text-align: center;
+    }
+
+    @media (max-width: 600px) {
+      .stats-panel { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    .stat-val {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--accent-cyan);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .stat-val.green { color: var(--accent-green); }
+
+    .stat-lbl {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      margin-top: 4px;
+      font-family: 'Exo 2', sans-serif;
+    }
+
+    /* ===== MANIFEST OUTPUT & ENTRIES ===== */
+    #manifestOutput {
+      display: none;
+      font-family: 'JetBrains Mono', monospace;
+      background: #020617;
+      color: var(--accent-cyan);
+      padding: 20px;
+      border-radius: var(--radius-md);
+      margin-top: 25px;
+      border: 1px solid rgba(56, 189, 248, 0.2);
+      box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.5);
+    }
+
+    #entriesList {
+      max-height: 220px;
+      overflow-y: auto;
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .entry-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+      background: rgba(30, 41, 59, 0.4);
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      border: 1px solid var(--card-border);
+      border-left: 3px solid var(--accent-purple);
+    }
+
+    .entry-item .entry-id {
+      font-weight: 700;
+      color: var(--text-primary);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .entry-item .entry-material {
+      color: var(--text-secondary);
+    }
+
+    .entry-item .entry-status {
+      color: var(--accent-green);
+      font-weight: 700;
+    }
+
+    /* ===== OFFLINE INDICATOR ===== */
+    .offline-indicator {
+      display: none;
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      color: var(--accent-amber);
+      padding: 12px 18px;
+      border-radius: var(--radius-sm);
+      margin-bottom: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      align-items: center;
+      gap: 10px;
+      font-family: 'Exo 2', sans-serif;
+    }
+
+    .offline-indicator.visible {
+      display: flex;
+    }
+
+    /* ===== TOAST ===== */
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #0f172a;
+      color: var(--text-primary);
+      padding: 14px 28px;
+      border-radius: 30px;
+      border: 1px solid var(--card-border);
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+      font-weight: 600;
+      font-size: 13px;
+      z-index: 99999;
+      animation: slideUp 0.3s ease;
+      font-family: 'Exo 2', sans-serif;
+    }
+
+    .toast.success { border-color: var(--accent-green); color: var(--accent-green); }
+    .toast.error { border-color: var(--accent-rose); color: var(--accent-rose); }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+      to { opacity: 1; transform: translateX(-50%) translateY(0); }
+    }
+
+    /* ===== FOOTER ===== */
+    .footer-credits {
+      text-align: center;
+      margin-top: 40px;
+      font-size: 12px;
+      color: var(--text-muted);
+      border-top: 1px solid var(--card-border);
+      padding-top: 25px;
+      font-family: 'Exo 2', sans-serif;
+    }
+
+    .footer-credits .quantum {
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--accent-purple);
+      letter-spacing: 0.5px;
+    }
+
+    .footer-logos {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 30px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+    }
+
+    .footer-logo {
+      height: 36px;
+      width: auto;
+      opacity: 0.6;
+      transition: all 0.3s ease;
+      filter: drop-shadow(0 0 10px rgba(2, 132, 199, 0.05));
+    }
+
+    .footer-logo:hover {
+      opacity: 1;
+      filter: drop-shadow(0 0 20px rgba(139, 92, 246, 0.15));
+      transform: scale(1.02);
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 680px) {
+      .brand-header { flex-direction: column; align-items: flex-start; }
+      .brand-logo-area { width: 100%; }
+      .header-badges { width: 100%; justify-content: flex-start; }
+      .brand-text h1 { font-size: 18px; }
+      .brand-logo { height: 40px; }
+    }
+  </style>
 </head>
 <body>
 
-    <!-- ============================================================
-    LOGIN OVERLAY
-    ============================================================ -->
-    <div id="loginOverlay">
-        <div class="login-card">
-            <img src="https://i.postimg.cc/zXW78GNH/Mind-Tech-Transparent-Logo.png" alt="MindTech Waste Management Engine" class="login-logo" onerror="this.src='https://i.postimg.cc/zXW78GNH/Mind-Tech-Transparent-Logo.png'">
-            <div class="login-title">MindTech Waste Management Engine</div>
-            <div class="login-subtitle">PELO · Community Collection Network</div>
+<!-- ===== QUANTUM PARTICLES ===== -->
+<div id="particles-js"></div>
 
-            <!-- GOOGLE SIGN-IN -->
-            <button class="btn-login btn-google" id="googleSignInBtn">
-                <i class="fab fa-google" style="font-size:1.1rem;"></i> Sign in with Google
-            </button>
+<div class="container">
+  
+  <!-- ===== BRAND HEADER ===== -->
+  <div class="brand-header">
+    <div class="brand-logo-area">
+      <img src="https://i.postimg.cc/zXW78GNH/Mind-Tech-Transparent-Logo.png" alt="MindTech Industries" class="brand-logo" onerror="this.style.display='none'">
+      <div class="brand-text">
+        <h1>MindTech Waste Management Engine</h1>
+        <div class="subtitle">PELO · Community Collection Network</div>
+      </div>
+    </div>
+    <div class="header-badges">
+      <div class="badge-pelo">Master Engine</div>
+      <div class="badge-quantum">⚛️ CHSH S=2.76</div>
+      <div class="badge-live" id="statusBadge">🔴 OFFLINE</div>
+    </div>
+  </div>
 
-            <!-- DIRECT CREDENTIAL LOGIN (DEO / MINDTECH PARTNER) -->
-            <form id="directLoginForm" onsubmit="handleDirectLogin(event)" style="margin-top: 14px;">
-                <div class="form-group" style="text-align: left;">
-                    <label style="color: var(--pelo-gold); font-size: 0.6rem;">Username / Partner Name</label>
-                    <input type="text" id="loginUsername" placeholder="e.g. DEO or MindTech Partner" required style="padding: 10px; font-size: 0.8rem;">
-                </div>
-                <div class="form-group" style="text-align: left;">
-                    <label style="color: var(--pelo-gold); font-size: 0.6rem;">Password (Default: 12345)</label>
-                    <input type="password" id="loginPassword" placeholder="Enter password" required style="padding: 10px; font-size: 0.8rem;">
-                </div>
-                <button type="submit" class="btn-login btn-demo" style="margin-top: 6px;">
-                    <i class="fas fa-sign-in-alt"></i> Login with Password
-                </button>
-            </form>
+  <!-- ===== OFFLINE INDICATOR ===== -->
+  <div class="offline-indicator" id="offlineIndicator">
+    <i class="fa-solid fa-wifi"></i>
+    <span id="offlineText">You are offline — data will be saved locally and synced when online</span>
+  </div>
 
-            <div class="login-divider">or</div>
+  <!-- ===== NAVIGATION TABS ===== -->
+  <div class="nav-tabs">
+    <button type="button" class="tab-btn active" id="tab-comm" onclick="switchView('community')">
+      <i class="fa-solid fa-earth-africa"></i> Community Network
+    </button>
+    <button type="button" class="tab-btn" id="tab-ind" onclick="switchView('industrial')">
+      <i class="fa-solid fa-industry"></i> Industrial Generator
+    </button>
+    <button type="button" class="tab-btn" id="tab-mindtech" onclick="switchView('mindtech')">
+      <i class="fa-solid fa-square-check"></i> MindTech Verification
+    </button>
+  </div>
 
-            <button class="btn-login btn-demo" id="demoLoginBtn" style="background: rgba(0, 180, 216, 0.2); border: 1px solid var(--primary);">
-                <i class="fas fa-user-astronaut"></i> Continue as Guest (Demo)
-            </button>
+  <button type="button" class="btn-demo" onclick="fillDemoData()">
+    <i class="fa-solid fa-bolt"></i> Pre-load Master Test Payload
+  </button>
 
-            <button class="btn-login btn-register" id="openRegisterBtn">
-                <i class="fas fa-user-plus"></i> Register New Account
-            </button>
+  <!-- ===== MAIN FORM ===== -->
+  <form id="unifiedPeloForm">
+    <input type="hidden" id="mode" value="community" />
+    <input type="hidden" id="gpsCoordinates" value="" />
 
-            <div id="loginError" class="login-error"></div>
-        </div>
+    <!-- SHARED MATERIAL SELECTOR -->
+    <div class="form-group">
+      <label for="wasteType">Material Classification <span class="required">*</span></label>
+      <select id="wasteType" required>
+        <option value="💻 E-Waste / Circuit Boards / Electronics">💻 E-Waste / Circuit Boards / Electronics</option>
+        <option value="🥫 Scrap Metal, Copper Wiring & Cables">🥫 Scrap Metal, Copper Wiring & Cables</option>
+        <option value="🔋 Batteries & Power Storage">🔋 Batteries & Power Storage</option>
+        <option value="🟢 Used Cooking Oil (L)">🟢 Used Cooking Oil (L)</option>
+        <option value="🟡 Used Engine Oil & Lubricants (L)">🟡 Used Engine Oil & Lubricants (L)</option>
+        <option value="♻️ HDPE / PET Plastic Waste (kg)">♻️ HDPE / PET Plastic Waste (kg)</option>
+        <option value="📦 Cardboard & Paper (kg)">📦 Cardboard & Paper (kg)</option>
+        <option value="🍌 Food / Organic Waste (kg)">🍌 Food / Organic Waste (kg)</option>
+      </select>
     </div>
 
-    <!-- ============================================================
-    REGISTRATION MODAL
-    ============================================================ -->
-    <div id="registerModal">
-        <div class="login-card" style="max-width:400px;">
-            <h2 style="font-size:1.3rem; margin-bottom:16px; color:var(--pelo-gold);">🌍 Create Account</h2>
-            <form id="registerForm" onsubmit="registerUser(event)">
-                <div class="form-group">
-                    <label>Full Name <span class="required">*</span></label>
-                    <input type="text" id="regName" placeholder="Your full name" required>
-                </div>
-                <div class="form-group">
-                    <label>Email Address <span class="required">*</span></label>
-                    <input type="email" id="regEmail" placeholder="your@email.com" required>
-                </div>
-                <div class="form-group">
-                    <label>Phone Number <span class="required">*</span></label>
-                    <input type="tel" id="regPhone" placeholder="+27 82 555 1234" required>
-                </div>
-                <div class="form-group">
-                    <label>Community / Area <span class="required">*</span></label>
-                    <input type="text" id="regArea" placeholder="e.g. Watville, Daveyton, eMalahleni" required>
-                </div>
-                <button type="submit" class="btn-primary" style="margin-top:10px;">
-                    <i class="fas fa-user-plus"></i> Create Account — Join PELO
-                </button>
-                <button type="button" class="btn-login btn-register" style="margin-top:10px;" id="closeRegisterBtn">
-                    <i class="fas fa-arrow-left"></i> Back to Login
-                </button>
-            </form>
-            <div id="registerError" class="login-error"></div>
+    <!-- COMMUNITY FIELDS -->
+    <div id="community-fields">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="siteType">Site Type <span class="required">*</span></label>
+          <select id="siteType" required>
+            <option value="🔧 Mechanic / Workshop">🔧 Mechanic / Workshop</option>
+            <option value="⚡ Generator / Plant">⚡ Generator / Plant</option>
+            <option value="🚗 Garage / Service Centre">🚗 Garage / Service Centre</option>
+            <option value="⛏️ Mining Site">⛏️ Mining Site</option>
+            <option value="🏪 Spaza / Tuck Shop">🏪 Spaza / Tuck Shop</option>
+            <option value="🍟 Kota Stand / Amagwinya">🍟 Kota Stand / Amagwinya</option>
+            <option value="📌 Other Site">📌 Other Site</option>
+          </select>
         </div>
+        <div class="form-group">
+          <label for="businessName">Business / Owner Name <span class="required">*</span></label>
+          <input type="text" id="businessName" placeholder="e.g. Tsakane Auto Workshop" required />
+        </div>
+        <div class="form-group">
+          <label for="collectorName">Collector ID / Registered Name <span class="required">*</span></label>
+          <input type="text" id="collectorName" placeholder="e.g. Sipho Nkosi (COL-804)" required />
+        </div>
+        <div class="form-group">
+          <label for="contactPhone">Phone Number <span class="required">*</span></label>
+          <input type="text" id="contactPhone" placeholder="+27 82 555 1234" required />
+        </div>
+        <div class="form-group">
+          <label for="declaredQty">Collected Volume / Weight <span class="required">*</span></label>
+          <input type="number" id="declaredQty" step="0.1" placeholder="Declared Volume or Weight" required />
+        </div>
+        <div class="form-group">
+          <label for="areaCommunity">Area / Community Hub <span class="required">*</span></label>
+          <input type="text" id="areaCommunity" placeholder="e.g. Wattville / City Deep" required />
+        </div>
+      </div>
+
+      <div class="form-group full-width">
+        <label>Drop Pin Location — GPS Capture</label>
+        <div id="map"></div>
+        <div style="font-size:12px; color:var(--text-muted); margin-top:6px;">
+          📍 Click on map to capture precision coordinates
+        </div>
+      </div>
+
+      <div class="section-title">
+        <i class="fa-solid fa-shield-halved"></i> Community Safety Contacts
+        <span class="count">(Optional)</span>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="whatsappGroup">WhatsApp Group</label>
+          <input type="text" id="whatsappGroup" placeholder="e.g. Wattville Safety Hub" />
+        </div>
+        <div class="form-group">
+          <label for="securityCompany">Security Company</label>
+          <input type="text" id="securityCompany" placeholder="e.g. Mapogo Security" />
+        </div>
+      </div>
     </div>
 
-    <!-- ============================================================
-    COLLECTOR REGISTRATION MODAL
-    ============================================================ -->
-    <div id="collectorRegisterModal">
-        <div class="login-card" style="max-width:400px;">
-            <h2 style="font-size:1.3rem; margin-bottom:16px; color:var(--pelo-gold);">
-                <i class="fas fa-hand-holding-heart"></i> Register to be a Collector
-            </h2>
-            <p style="font-size:0.7rem; color:var(--text-secondary); margin-bottom:16px;">
-                Join the PELO network. Help collect waste, earn from recycling, and build a greener Africa.
-            </p>
-            <form id="collectorRegisterForm" onsubmit="registerCollector(event)">
-                <div class="form-group">
-                    <label>Full Name <span class="required">*</span></label>
-                    <input type="text" id="colRegName" placeholder="Your full name" required>
-                </div>
-                <div class="form-group">
-                    <label>Email Address <span class="required">*</span></label>
-                    <input type="email" id="colRegEmail" placeholder="your@email.com" required>
-                </div>
-                <div class="form-group">
-                    <label>Phone Number <span class="required">*</span></label>
-                    <input type="tel" id="colRegPhone" placeholder="+27 82 555 1234" required>
-                </div>
-                <div class="form-group">
-                    <label>Community / Area <span class="required">*</span></label>
-                    <input type="text" id="colRegArea" placeholder="e.g. Watville, Daveyton" required>
-                </div>
-                <div class="form-group">
-                    <label>Collection Experience</label>
-                    <select id="colRegExperience">
-                        <option value="beginner">🌱 Beginner — Just starting</option>
-                        <option value="intermediate">🔄 Intermediate — Some experience</option>
-                        <option value="experienced">♻️ Experienced — Active collector</option>
-                        <option value="business">🏢 Business — I run a collection business</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Why do you want to collect?</label>
-                    <textarea id="colRegReason" rows="3" placeholder="Tell us about your motivation..."></textarea>
-                </div>
-                <button type="submit" class="btn-primary" style="margin-top:10px; background: linear-gradient(135deg, var(--pelo-green), var(--pelo-gold));">
-                    <i class="fas fa-check-circle"></i> Register as Collector
-                </button>
-                <button type="button" class="btn-login btn-register" style="margin-top:10px;" id="closeCollectorRegisterBtn">
-                    <i class="fas fa-arrow-left"></i> Back to App
-                </button>
-            </form>
-            <div id="collectorRegisterError" class="login-error"></div>
+    <!-- INDUSTRIAL FIELDS -->
+    <div id="industrial-fields" style="display:none;">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="companyName">Generator Legal Name <span class="required">*</span></label>
+          <input type="text" id="companyName" placeholder="e.g. Apex Industrial SA (Pty) Ltd" required />
         </div>
+        <div class="form-group">
+          <label for="regNumber">CIPC / SAWIS Registration <span class="required">*</span></label>
+          <input type="text" id="regNumber" placeholder="e.g. 2018/592014/07" required />
+        </div>
+        <div class="form-group">
+          <label for="indTonnage">Declared Manifest Weight (Tons/Kg) <span class="required">*</span></label>
+          <input type="number" id="indTonnage" step="0.1" placeholder="0.0" required />
+        </div>
+        <div class="form-group">
+          <label for="complianceEmail">Compliance Email <span class="required">*</span></label>
+          <input type="email" id="complianceEmail" placeholder="compliance@company.co.za" required />
+        </div>
+      </div>
     </div>
 
-    <!-- ============================================================
-    MAIN APP
-    ============================================================ -->
-    <div id="appContainer" class="container">
-
-        <!-- ===== HEADER ===== -->
-        <header class="header">
-            <img src="https://i.postimg.cc/zXW78GNH/Mind-Tech-Transparent-Logo.png" alt="MindTech Industries" class="header-logo" onerror="this.src='https://i.postimg.cc/zXW78GNH/Mind-Tech-Transparent-Logo.png'">
-            <div class="header-text">
-                <h1>MindTech Waste Management Engine</h1>
-                <p>PELO · Community Collection Network</p>
-            </div>
-            <span class="header-badge">⚛️ CHSH S=2.76</span>
-            <div class="header-user">
-                <span id="userNameDisplay">Guest</span>
-                <button class="btn-collector-register" id="openCollectorRegisterBtn">
-                    <i class="fas fa-user-plus"></i> Register to be a Collector
-                </button>
-                <button class="btn-logout" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
-            </div>
-        </header>
-
-        <!-- ===== OFFLINE INDICATOR ===== -->
-        <div class="offline-indicator" id="offlineIndicator">
-            <i class="fas fa-wifi"></i>
-            <span id="offlineText">You are offline — data will be saved locally and synced when online</span>
+    <!-- MINDTECH VERIFICATION FIELDS -->
+    <div id="mindtech-fields" style="display:none;">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="manifestIdInput">Scan / Input Manifest Hash ID <span class="required">*</span></label>
+          <input type="text" id="manifestIdInput" placeholder="e.g. MNF-1725199200000-8A3" required />
         </div>
-
-        <!-- ============================================================
-        MAIN DATA COLLECTION FORM — ALWAYS VISIBLE
-        ============================================================ -->
-        <div class="glass-card">
-            <div class="card-header">
-                <i class="fas fa-clipboard-list"></i>
-                <h3>New Entry</h3>
-                <span class="count-badge" id="entryCount">0 entries</span>
-            </div>
-
-            <form id="dataForm" onsubmit="submitEntry(event)">
-
-                <div class="form-group">
-                    <label>Site Type <span class="required">*</span></label>
-                    <select id="siteType" required>
-                        <option value="mechanic">🔧 Mechanic / Workshop</option>
-                        <option value="generator">⚡ Generator / Plant</option>
-                        <option value="garage">🚗 Garage / Service Centre</option>
-                        <option value="mine">⛏️ Mining Site</option>
-                        <option value="fastfood">🍔 Fast Food / Takeaway</option>
-                        <option value="kota">🍟 Kota Stand / Amagwinya</option>
-                        <option value="roadhouse">🏍️ Roadhouse</option>
-                        <option value="spaza">🏪 Spaza / Tuck Shop</option>
-                        <option value="other">📌 Other (specify below)</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>Business / Owner Name <span class="required">*</span></label>
-                    <input type="text" id="ownerName" placeholder="e.g. Watville Auto Repairs" required>
-                </div>
-
-                <div class="form-row-2">
-                    <div class="form-group">
-                        <label>Contact Person <span class="required">*</span></label>
-                        <input type="text" id="contactPerson" placeholder="Full name" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Phone Number <span class="required">*</span></label>
-                        <input type="tel" id="phoneNumber" placeholder="+27 82 555 1234" required>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Area / Community <span class="required">*</span></label>
-                    <input type="text" id="area" placeholder="e.g. Watville, Daveyton, eMalahleni" required>
-                </div>
-
-                <div class="form-group">
-                    <label>Full Address / GPS</label>
-                    <input type="text" id="address" placeholder="Street address or GPS coordinates">
-                </div>
-
-                <div class="form-row-3">
-                    <div class="form-group">
-                        <label>Cooking Oil (L) <span class="required">*</span></label>
-                        <input type="number" id="oilVolume" placeholder="e.g. 200" required min="0">
-                    </div>
-                    <div class="form-group">
-                        <label>Engine Oil (L)</label>
-                        <input type="number" id="engineOil" placeholder="e.g. 50" min="0">
-                    </div>
-                    <div class="form-group">
-                        <label>Other Waste (kg)</label>
-                        <input type="number" id="otherVolume" placeholder="e.g. 30" min="0">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Waste Type(s) Collected</label>
-                    <select id="wasteType" multiple style="height:80px;">
-                        <option value="cooking_oil">🟢 Used Cooking Oil</option>
-                        <option value="engine_oil">🟡 Used Engine Oil</option>
-                        <option value="diesel">⛽ Used Diesel/Petrol</option>
-                        <option value="food_waste">🍌 Food / Organic Waste</option>
-                        <option value="plastic">♻️ Plastic Waste</option>
-                        <option value="cardboard">📦 Cardboard / Paper</option>
-                        <option value="aluminium">🥫 Aluminium / Tin</option>
-                        <option value="batteries">🔋 Batteries</option>
-                        <option value="ewaste">💻 Electronic Waste</option>
-                        <option value="other">📌 Other</option>
-                    </select>
-                    <span style="font-size:0.55rem; color:var(--text-muted);">Hold Ctrl (Cmd) to select multiple</span>
-                </div>
-
-                <div class="form-row-2">
-                    <div class="form-group">
-                        <label>Collection Frequency</label>
-                        <select id="collectionFrequency">
-                            <option value="daily">Daily</option>
-                            <option value="weekly" selected>Weekly</option>
-                            <option value="monthly">Monthly</option>
-                            <option value="onetime">One-off</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Estimated Monthly Volume (L/kg)</label>
-                        <input type="number" id="monthlyVolume" placeholder="e.g. 500" min="0">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Current Disposal Method</label>
-                    <select id="disposalMethod">
-                        <option value="unknown">— Select —</option>
-                        <option value="dumped">Dumped on site</option>
-                        <option value="informal">Informal collector</option>
-                        <option value="licensed">Licensed collector</option>
-                        <option value="unknown">Don't know</option>
-                    </select>
-                </div>
-
-                <div class="form-section-title">
-                    <i class="fas fa-shield-alt"></i> Community Safety Contacts
-                    <span style="font-size:0.5rem; color:var(--text-muted); font-weight:400; text-transform:none; margin-left:4px;">(optional)</span>
-                </div>
-
-                <div class="form-row-3">
-                    <div class="form-group">
-                        <label>WhatsApp Group <span class="optional">(optional)</span></label>
-                        <input type="text" id="whatsappGroup" placeholder="Group name or invite link">
-                    </div>
-                    <div class="form-group">
-                        <label>WhatsApp Admin <span class="optional">(optional)</span></label>
-                        <input type="text" id="whatsappAdmin" placeholder="Admin name or phone">
-                    </div>
-                    <div class="form-group">
-                        <label>Security Company <span class="optional">(optional)</span></label>
-                        <input type="text" id="securityCompany" placeholder="Security company name">
-                    </div>
-                </div>
-
-                <div class="form-row-3">
-                    <div class="form-group">
-                        <label>Security Contact <span class="optional">(optional)</span></label>
-                        <input type="text" id="securityContact" placeholder="Contact name or number">
-                    </div>
-                    <div class="form-group">
-                        <label>Police Station <span class="optional">(optional)</span></label>
-                        <input type="text" id="policeStation" placeholder="Nearest police station">
-                    </div>
-                    <div class="form-group">
-                        <label>Police Ward Cell <span class="optional">(optional)</span></label>
-                        <input type="text" id="policeWard" placeholder="Police ward or station number">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Notes / Observations</label>
-                    <textarea id="notes" placeholder="Any additional information..."></textarea>
-                </div>
-
-                <div id="map"></div>
-                <div class="map-hint">
-                    <i class="fas fa-map-pin"></i> Click on the map to drop a pin — coordinates will be captured
-                </div>
-
-                <input type="hidden" id="latitude" value="">
-                <input type="hidden" id="longitude" value="">
-
-                <button type="submit" class="btn-primary" id="submitBtn">
-                    <i class="fas fa-check-circle"></i> Submit Entry
-                </button>
-
-                <div style="margin-top:10px; text-align:center; font-size:0.55rem; color:var(--text-secondary);">
-                    <i class="fas fa-lock"></i> Quantum-verified · CHSH S=2.76 · SA 2026/05142
-                </div>
-            </form>
+        <div class="form-group">
+          <label for="mindtechInspector">MindTech Receiving Inspector <span class="required">*</span></label>
+          <input type="text" id="mindtechInspector" placeholder="e.g. MindTech Gate 2 - Officer Mabuza" required />
         </div>
-
-        <!-- ============================================================
-        COMMUNITY SECTION — HIDDEN UNTIL REGISTERED/LOGGED IN
-        ============================================================ -->
-        <div id="communitySection" class="glass-card" style="border-color: var(--pelo-gold); background: linear-gradient(135deg, rgba(15,25,45,0.40), rgba(27,77,61,0.25));">
-            <div class="card-header" style="border-bottom-color: rgba(200,164,80,0.2);">
-                <i class="fas fa-hands-helping" style="color: var(--pelo-gold);"></i>
-                <h3 style="color: var(--pelo-gold);">🌍 Community Collection Network</h3>
-                <span class="count-badge" style="background: rgba(200,164,80,0.12); color: var(--pelo-gold);">
-                    <i class="fas fa-leaf"></i> Green Impact
-                </span>
-            </div>
-
-            <!-- ENVIRONMENTAL IMPACT STATS -->
-            <div class="impact-grid">
-                <div class="impact-card">
-                    <div class="value gold" id="totalOilCollected">0</div>
-                    <div class="label">Litres Cooking Oil</div>
-                </div>
-                <div class="impact-card">
-                    <div class="value green" id="totalSites">0</div>
-                    <div class="label">Sites Registered</div>
-                </div>
-                <div class="impact-card">
-                    <div class="value cyan" id="totalCommunities">0</div>
-                    <div class="label">Communities</div>
-                </div>
-                <div class="impact-card">
-                    <div class="value primary" id="totalCO2Saved">0</div>
-                    <div class="label">kg CO₂ Prevented</div>
-                </div>
-            </div>
-
-            <!-- COMMUNITY ENQUIRY FORM -->
-            <div style="background: rgba(0,0,0,0.15); border-radius: 16px; padding: 20px; margin-top: 10px; border: 1px solid var(--glass-border);">
-                <h4 style="color: var(--pelo-gold); margin-bottom: 12px; font-size: 1rem;">
-                    <i class="fas fa-paper-plane"></i> Let's Build a Greener Future — Get Involved
-                </h4>
-                <p style="font-size: 0.7rem; color: var(--text-secondary); margin-bottom: 16px;">
-                    Request a collection, partner with us, or share your environmental initiative. We'll respond within 24 hours.
-                </p>
-
-                <form id="communityEnquiryForm"
-                      action="https://formsubmit.co/mindtech.industriesai@gmail.com"
-                      method="POST"
-                      onsubmit="submitEnquiry(event)">
-
-                    <input type="hidden" name="_captcha" value="false">
-                    <input type="hidden" name="_subject" value="PELO Community Enquiry — New Request">
-                    <input type="hidden" name="_template" value="table">
-                    <input type="hidden" name="_autoresponse"
-                           value="Thank you for contacting PELO Data Collection. We'll respond within 24 hours. WhatsApp: +27 60 300 4859">
-                    <input type="hidden" name="_cc" value="mindtech.industriesai@gmail.com">
-
-                    <div class="form-row-2">
-                        <div class="form-group">
-                            <label><i class="fas fa-user"></i> Full Name <span class="required">*</span></label>
-                            <input type="text" name="name" id="enquiryName" placeholder="Your full name" required>
-                        </div>
-                        <div class="form-group">
-                            <label><i class="fas fa-envelope"></i> Email Address <span class="required">*</span></label>
-                            <input type="email" name="email" id="enquiryEmail" placeholder="your@email.com" required>
-                        </div>
-                    </div>
-
-                    <div class="form-row-2">
-                        <div class="form-group">
-                            <label><i class="fas fa-phone"></i> Phone Number</label>
-                            <input type="tel" name="phone" id="enquiryPhone" placeholder="+27 82 555 1234">
-                        </div>
-                        <div class="form-group">
-                            <label><i class="fas fa-map-pin"></i> Community / Area</label>
-                            <input type="text" name="area" id="enquiryArea" placeholder="e.g. Watville, Daveyton">
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label><i class="fas fa-comment"></i> How can we partner? <span class="required">*</span></label>
-                        <select name="enquiryType" id="enquiryType" required>
-                            <option value="">— Select enquiry type —</option>
-                            <option value="collection">🔄 Request Collection — I have waste to donate</option>
-                            <option value="partner">🤝 Partnership — I want to collaborate</option>
-                            <option value="community">🌱 Community Initiative — I'm running a clean-up</option>
-                            <option value="supply">📦 Supply — I can supply waste materials</option>
-                            <option value="volunteer">🧑‍🤝‍🧑 Volunteer — I want to help</option>
-                            <option value="other">📌 Other — Let's talk</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label><i class="fas fa-recycle"></i> Your Message *</label>
-                        <textarea name="message" id="enquiryMessage" rows="4"
-                                  placeholder="Tell us about your waste, your community, or your environmental initiative..."
-                                  required></textarea>
-                    </div>
-
-                    <button type="submit" class="btn-primary" style="background: linear-gradient(135deg, var(--pelo-green), var(--pelo-gold));">
-                        <i class="fas fa-rocket"></i> Send Enquiry — Join the Movement
-                    </button>
-                </form>
-
-                <div id="enquirySuccess" style="display: none; margin-top: 16px; padding: 16px; background: rgba(0,255,136,0.06); border: 1px solid var(--success); border-radius: 14px; text-align: center;">
-                    <p style="color: var(--success);">
-                        <i class="fas fa-check-circle"></i>
-                        <strong>Enquiry sent successfully! 🌍</strong>
-                    </p>
-                    <p style="font-size: 0.65rem; color: var(--text-secondary); margin-top: 6px;">
-                        Thank you for being part of the solution. Our team will respond within 24 hours.
-                        <br>For urgent matters: WhatsApp +27 60 300 4859
-                    </p>
-                </div>
-            </div>
-
-            <!-- COMMUNITY NOTICE BOARD -->
-            <div class="notice-board">
-                <div class="notice-header">
-                    <i class="fas fa-bullhorn"></i>
-                    <span>COMMUNITY NOTICE BOARD</span>
-                    <span class="badge">Live</span>
-                </div>
-                <div class="notice-content" id="noticeBoard">
-                    <p>🌱 <strong>PELO Recovery</strong> — Collecting used cooking oil from <strong>Watville</strong> this Friday. Call +27 82 555 1234 to donate.</p>
-                    <p>♻️ <strong>Community Clean-Up</strong> — Daveyton this Saturday. Meet at 8am at the community centre.</p>
-                    <p>💡 <strong>Did you know?</strong> 1 litre of used oil can be converted into 0.8 litres of biofuel. Every drop counts!</p>
-                </div>
-            </div>
+        <div class="form-group">
+          <label for="verifiedWeight">MindTech Scale Verified Weight (Kg/L) <span class="required">*</span></label>
+          <input type="number" id="verifiedWeight" step="0.1" placeholder="Verified Weighbridge Reading" required />
         </div>
-
-        <!-- ===== SUBMITTED ENTRIES ===== -->
-        <div class="glass-card">
-            <div class="card-header">
-                <i class="fas fa-database"></i>
-                <h3>Submitted Entries</h3>
-                <span class="count-badge" id="submittedCount">0 entries</span>
-            </div>
-
-            <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
-                <button class="btn-secondary" onclick="exportCSV()"><i class="fas fa-file-export"></i> Export CSV</button>
-                <button class="btn-secondary" onclick="syncEntries()"><i class="fas fa-sync-alt"></i> Sync Now</button>
-                <button class="btn-secondary" onclick="clearAllEntries()" style="color:var(--danger);border-color:rgba(239,71,111,0.15);"><i class="fas fa-trash"></i> Clear All</button>
-            </div>
-
-            <div id="entriesList" class="entries-list">
-                <p style="color:var(--text-secondary); font-size:0.75rem; text-align:center; padding:20px 0;">
-                    No entries yet. Submit your first site above.
-                </p>
-            </div>
+        <div class="form-group">
+          <label for="stolenCheck">Chain-of-Custody & Theft Validation <span class="required">*</span></label>
+          <select id="stolenCheck" required>
+            <option value="✅ Verified Match (Legitimate Origin)">✅ Verified Match (Legitimate Origin)</option>
+            <option value="⚠️ Weight Mismatch Flagged">⚠️ Weight Mismatch Flagged</option>
+            <option value="🚨 Unregistered / Suspected Stolen Material">🚨 Unregistered / Suspected Stolen Material</option>
+          </select>
         </div>
-
-        <!-- ===== FOOTER ===== -->
-        <div class="footer">
-            <div class="footer-logos">
-                <img src="https://i.postimg.cc/zXW78GNH/Mind-Tech-Transparent-Logo.png" alt="MindTech Industries" class="footer-logo" onerror="this.style.display='none'">
-                <img src="https://i.postimg.cc/T3ytnBqN/KD-LOGO-IMAGE-removebg-preview.png" alt="KD Concepts" class="footer-logo" onerror="this.style.display='none'">
-                <img src="https://raw.githubusercontent.com/mindtechindustriesai-alt/my-images/main/pelo_community_final_image-removebg-preview.png" alt="PELO Recovery" class="footer-logo" onerror="this.style.display='none'">
-            </div>
-            <div class="quantum-line">⚛️ CHSH S=2.76 · SA 2026/05142</div>
-            <div class="copyright">© 2026 MindTech Waste Management Engine · Powered by MindTech Industries</div>
-        </div>
-
+      </div>
     </div>
 
-    <!-- ============================================================
-    JAVASCRIPT — COMPLETE WITH FIRESTORE + QUANTUM BACKEND
-    ============================================================ -->
-    <script>
-        // ============================================================
-        // FIREBASE CONFIG — FROM ENV VARS
-        // ============================================================
-        const firebaseConfig = {
-            apiKey: "AIzaSyD5OB59lG6bAsmQ7A97zXP_MfQ5AM3BYaw",
-            authDomain: "mindflow-ai-education.firebaseapp.com",
-            projectId: "mindflow-ai-education",
-            storageBucket: "mindflow-ai-education.firebasestorage.app",
-            messagingSenderId: "157615197603",
-            appId: "1:157615197603:web:540d67781fc55d04c11e16"
-        };
-
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
-        auth.setPersistence(firebase.auth.Auth.Persistence.NONE);
-
-        // ============================================================
-        // QUANTUM BACKEND — CHSH S=2.76 Verified via Firestore
-        // ============================================================
-        const QUANTUM_STATE = {
-            chsh: 2.76,
-            patent: 'SA 2026/05142',
-            verified: true,
-            timestamp: new Date().toISOString()
-        };
-
-        function saveQuantumState() {
-            db.collection('quantum_state').doc('pelo_system').set({
-                ...QUANTUM_STATE,
-                lastVerified: firebase.firestore.FieldValue.serverTimestamp()
-            }).catch(() => {});
-        }
-
-        async function verifyQuantumState() {
-            try {
-                const doc = await db.collection('quantum_state').doc('pelo_system').get();
-                if (doc.exists) {
-                    const data = doc.data();
-                    console.log('⚛️ Quantum State Verified:', data);
-                    return data;
-                }
-                return QUANTUM_STATE;
-            } catch (e) {
-                console.log('⚛️ Using local quantum state');
-                return QUANTUM_STATE;
-            }
-        }
-
-        // ============================================================
-        // STATE
-        // ============================================================
-        let entries = [];
-        let map = null;
-        let marker = null;
-        let isOffline = !navigator.onLine;
-        let currentUser = null;
-        let isDemo = false;
-        let authResolved = false;
-
-        // ============================================================
-        // SCREEN MANAGEMENT
-        // ============================================================
-        function showScreen(screen) {
-            const loginOverlay = document.getElementById('loginOverlay');
-            const registerModal = document.getElementById('registerModal');
-            const collectorRegisterModal = document.getElementById('collectorRegisterModal');
-            const appContainer = document.getElementById('appContainer');
-
-            loginOverlay.classList.remove('hidden');
-            registerModal.classList.remove('visible');
-            collectorRegisterModal.classList.remove('visible');
-            appContainer.classList.remove('visible');
-
-            if (screen === 'login') {
-                loginOverlay.classList.remove('hidden');
-            } else if (screen === 'register') {
-                registerModal.classList.add('visible');
-            } else if (screen === 'collectorRegister') {
-                collectorRegisterModal.classList.add('visible');
-            } else if (screen === 'app') {
-                loginOverlay.classList.add('hidden');
-                appContainer.classList.add('visible');
-                checkAndShowCommunity();
-            }
-        }
-
-        function checkAndShowCommunity() {
-            const communitySection = document.getElementById('communitySection');
-            if (currentUser) {
-                communitySection.classList.add('visible');
-                updateEnvironmentalStats();
-            } else {
-                communitySection.classList.remove('visible');
-            }
-        }
-
-        // ============================================================
-        // DOM REFS
-        // ============================================================
-        const googleBtn = document.getElementById('googleSignInBtn');
-        const demoBtn = document.getElementById('demoLoginBtn');
-        const openRegisterBtn = document.getElementById('openRegisterBtn');
-        const closeRegisterBtn = document.getElementById('closeRegisterBtn');
-        const openCollectorRegisterBtn = document.getElementById('openCollectorRegisterBtn');
-        const closeCollectorRegisterBtn = document.getElementById('closeCollectorRegisterBtn');
-        const logoutBtn = document.getElementById('logoutBtn');
-        const loginError = document.getElementById('loginError');
-
-        // ============================================================
-        // AUTH FUNCTIONS
-        // ============================================================
-        function loginWithGoogle() {
-            loginError.textContent = '⏳ Signing in with Google...';
-            const provider = new firebase.auth.GoogleAuthProvider();
-            auth.signInWithPopup(provider)
-                .then((result) => {
-                    currentUser = result.user;
-                    isDemo = false;
-                    authResolved = true;
-                    loginError.textContent = '';
-                    document.getElementById('userNameDisplay').textContent = currentUser.displayName || currentUser.email || 'User';
-                    showScreen('app');
-                    loadEntries();
-                    loadUserData();
-                    saveQuantumState();
-                    showToast('✅ Welcome, ' + (currentUser.displayName || 'User') + '!');
-                })
-                .catch((error) => {
-                    loginError.textContent = '❌ ' + error.message;
-                });
-        }
-
-        // DIRECT LOGIN FOR DEO & MINDTECH PARTNER (DEFAULT PASSWORD 12345)
-        function handleDirectLogin(event) {
-            event.preventDefault();
-            const username = document.getElementById('loginUsername').value.trim();
-            const password = document.getElementById('loginPassword').value.trim();
-
-            if (!username || !password) {
-                loginError.textContent = '⚠️ Please enter both username and password.';
-                return;
-            }
-
-            if (password !== '12345') {
-                loginError.textContent = '❌ Invalid password. Use default password: 12345';
-                return;
-            }
-
-            currentUser = {
-                uid: 'user_' + username.toLowerCase().replace(/\s+/g, '_'),
-                displayName: username,
-                email: username.toLowerCase().replace(/\s+/g, '') + '@mindtech.internal'
-            };
-            isDemo = false;
-            authResolved = true;
-            loginError.textContent = '';
-            document.getElementById('userNameDisplay').textContent = '👤 ' + currentUser.displayName;
-            showScreen('app');
-            loadEntries();
-            saveQuantumState();
-            showToast('✅ Welcome, ' + currentUser.displayName + '!');
-        }
-
-        function loginAsDemo() {
-            currentUser = { uid: 'demo_' + Date.now(), displayName: 'Guest User', email: 'guest@pelorecovery.co.za' };
-            isDemo = true;
-            authResolved = true;
-            loginError.textContent = '';
-            document.getElementById('userNameDisplay').textContent = '👤 Guest User';
-            showScreen('app');
-            loadEntries();
-            showToast('👋 Welcome, Guest! Your data is saved locally.');
-        }
-
-        function registerUser(event) {
-            event.preventDefault();
-            const name = document.getElementById('regName').value.trim();
-            const email = document.getElementById('regEmail').value.trim();
-            const phone = document.getElementById('regPhone').value.trim();
-            const area = document.getElementById('regArea').value.trim();
-
-            if (!name || !email || !phone || !area) {
-                document.getElementById('registerError').textContent = '⚠️ All fields are required.';
-                return;
-            }
-
-            const formData = new FormData();
-            formData.append('_subject', 'PELO Registration — New User');
-            formData.append('_captcha', 'false');
-            formData.append('_template', 'table');
-            formData.append('_autoresponse', 'Thank you for registering with PELO Data Collection. Welcome to the community!');
-            formData.append('_cc', 'mindtech.industriesai@gmail.com');
-            formData.append('name', name);
-            formData.append('email', email);
-            formData.append('phone', phone);
-            formData.append('area', area);
-
-            fetch('https://formsubmit.co/mindtech.industriesai@gmail.com', {
-                method: 'POST',
-                body: formData
-            }).catch(() => {});
-
-            db.collection('users').doc(email).set({
-                name: name,
-                email: email,
-                phone: phone || '',
-                area: area || '',
-                registeredAt: firebase.firestore.FieldValue.serverTimestamp(),
-                isDemo: false,
-                quantumState: QUANTUM_STATE
-            })
-            .then(() => {
-                document.getElementById('registerError').textContent = '';
-                currentUser = { uid: 'registered_' + email, displayName: name, email: email };
-                isDemo = false;
-                authResolved = true;
-                document.getElementById('userNameDisplay').textContent = '👤 ' + name;
-                showScreen('app');
-                showToast('✅ Account created! Welcome, ' + name + '!');
-                loadEntries();
-                saveQuantumState();
-            })
-            .catch((error) => {
-                document.getElementById('registerError').textContent = '❌ ' + error.message;
-            });
-        }
-
-        function registerCollector(event) {
-            event.preventDefault();
-            const name = document.getElementById('colRegName').value.trim();
-            const email = document.getElementById('colRegEmail').value.trim();
-            const phone = document.getElementById('colRegPhone').value.trim();
-            const area = document.getElementById('colRegArea').value.trim();
-            const experience = document.getElementById('colRegExperience').value;
-            const reason = document.getElementById('colRegReason').value.trim();
-
-            if (!name || !email || !phone || !area) {
-                document.getElementById('collectorRegisterError').textContent = '⚠️ All required fields must be filled.';
-                return;
-            }
-
-            db.collection('collectors').doc(email).set({
-                name: name,
-                email: email,
-                phone: phone,
-                area: area,
-                experience: experience,
-                reason: reason || 'Not specified',
-                registeredAt: firebase.firestore.FieldValue.serverTimestamp(),
-                quantumState: QUANTUM_STATE,
-                status: 'active'
-            })
-            .then(() => {
-                document.getElementById('collectorRegisterError').textContent = '';
-                document.getElementById('collectorRegisterForm').reset();
-                showScreen('app');
-                showToast('✅ You are now registered as a PELO Collector! 🌍');
-                addCommunityNotice(`🎉 New Collector: <strong>${name}</strong> from ${area} — Welcome to the PELO network!`);
-                saveQuantumState();
-            })
-            .catch((error) => {
-                document.getElementById('collectorRegisterError').textContent = '❌ ' + error.message;
-            });
-        }
-
-        function logout() {
-            if (!isDemo && auth.currentUser) {
-                auth.signOut();
-            }
-            currentUser = null;
-            isDemo = false;
-            authResolved = false;
-            document.getElementById('communitySection').classList.remove('visible');
-            showScreen('login');
-            showToast('👋 Logged out.');
-        }
-
-        function loadUserData() {
-            if (!currentUser) return;
-            const userRef = db.collection('users').doc(currentUser.email || currentUser.uid);
-            userRef.get().then((doc) => {
-                if (doc.exists) {
-                    const data = doc.data();
-                    document.getElementById('userNameDisplay').textContent = data.name || currentUser.displayName || 'User';
-                }
-            }).catch(() => {});
-        }
-
-        // ============================================================
-        // AUTH STATE LISTENER
-        // ============================================================
-        auth.onAuthStateChanged((user) => {
-            authResolved = true;
-            if (user) {
-                currentUser = user;
-                isDemo = false;
-                document.getElementById('userNameDisplay').textContent = currentUser.displayName || currentUser.email || 'User';
-                showScreen('app');
-                loadEntries();
-                loadUserData();
-                verifyQuantumState();
-            } else {
-                if (!isDemo && !currentUser) {
-                    showScreen('login');
-                }
-            }
-        });
-
-        setTimeout(() => {
-            if (!authResolved) {
-                authResolved = true;
-                showScreen('login');
-            }
-        }, 3000);
-
-        // ============================================================
-        // EVENT LISTENERS
-        // ============================================================
-        googleBtn.addEventListener('click', loginWithGoogle);
-        demoBtn.addEventListener('click', loginAsDemo);
-        openRegisterBtn.addEventListener('click', () => showScreen('register'));
-        closeRegisterBtn.addEventListener('click', () => showScreen('login'));
-        openCollectorRegisterBtn.addEventListener('click', () => showScreen('collectorRegister'));
-        closeCollectorRegisterBtn.addEventListener('click', () => showScreen('app'));
-        logoutBtn.addEventListener('click', logout);
-
-        // ============================================================
-        // STATS & NOTICES
-        // ============================================================
-        function updateEnvironmentalStats() {
-            const totalOil = entries.reduce((sum, e) => sum + (parseInt(e.oilVolume) || 0), 0);
-            const totalSites = entries.length;
-            const uniqueAreas = new Set(entries.map(e => e.area)).size;
-            const co2Saved = Math.round(totalOil * 0.8 * 0.75);
-
-            document.getElementById('totalOilCollected').textContent = totalOil + 'L';
-            document.getElementById('totalSites').textContent = totalSites;
-            document.getElementById('totalCommunities').textContent = uniqueAreas;
-            document.getElementById('totalCO2Saved').textContent = co2Saved + 'kg';
-        }
-
-        function submitEnquiry(event) {
-            event.preventDefault();
-            const form = document.getElementById('communityEnquiryForm');
-            const successDiv = document.getElementById('enquirySuccess');
-
-            const btn = form.querySelector('button[type="submit"]');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
-            btn.disabled = true;
-
-            const formData = new FormData(form);
-            fetch(form.action, {
-                method: 'POST',
-                body: formData
-            })
-            .then(() => {
-                successDiv.style.display = 'block';
-                form.reset();
-                btn.innerHTML = '<i class="fas fa-check"></i> Sent!';
-                setTimeout(() => {
-                    btn.innerHTML = originalText;
-                    btn.disabled = false;
-                }, 3000);
-                showToast('🌍 Enquiry sent! Together we\'re building a greener future.', 'success');
-                addCommunityNotice('💬 New enquiry submitted — Team is on it!');
-            })
-            .catch(() => {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-                showToast('❌ Something went wrong. Please try again.', 'error');
-            });
-        }
-
-        function addCommunityNotice(notice) {
-            const board = document.getElementById('noticeBoard');
-            const p = document.createElement('p');
-            p.innerHTML = notice;
-            board.insertBefore(p, board.firstChild);
-            if (board.children.length > 10) {
-                board.removeChild(board.lastChild);
-            }
-        }
-
-        // ============================================================
-        // OFFLINE & STORAGE MANAGEMENT
-        // ============================================================
-        function updateOfflineStatus() {
-            isOffline = !navigator.onLine;
-            const indicator = document.getElementById('offlineIndicator');
-            const text = document.getElementById('offlineText');
-
-            if (isOffline) {
-                indicator.classList.add('visible');
-                text.textContent = 'You are offline — data will be saved locally and synced when online';
-            } else {
-                indicator.classList.remove('visible');
-                if (entries.some(e => !e.synced)) {
-                    syncEntries();
-                }
-            }
-        }
-
-        window.addEventListener('online', updateOfflineStatus);
-        window.addEventListener('offline', updateOfflineStatus);
-
-        function loadEntries() {
-            try {
-                const saved = localStorage.getItem('pelo_data_entries');
-                if (saved) {
-                    entries = JSON.parse(saved);
-                }
-            } catch(e) {
-                entries = [];
-            }
-            renderEntries();
-            updateCounts();
-            updateOfflineStatus();
-            if (document.getElementById('communitySection').classList.contains('visible')) {
-                updateEnvironmentalStats();
-            }
-        }
-
-        function saveEntries() {
-            localStorage.setItem('pelo_data_entries', JSON.stringify(entries));
-            renderEntries();
-            updateCounts();
-            if (document.getElementById('communitySection').classList.contains('visible')) {
-                updateEnvironmentalStats();
-            }
-        }
-
-        function renderEntries() {
-            const container = document.getElementById('entriesList');
-
-            if (entries.length === 0) {
-                container.innerHTML = `
-                    <p style="color:var(--text-secondary); font-size:0.75rem; text-align:center; padding:20px 0;">
-                        No entries yet. Submit your first site above.
-                    </p>
-                `;
-                return;
-            }
-
-            let html = '';
-            entries.forEach((entry, index) => {
-                const siteTypeLabels = {
-                    'mechanic': '🔧 Mechanic',
-                    'generator': '⚡ Generator',
-                    'garage': '🚗 Garage',
-                    'mine': '⛏️ Mine',
-                    'fastfood': '🍔 Fast Food',
-                    'kota': '🍟 Kota / Amagwinya',
-                    'roadhouse': '🏍️ Roadhouse',
-                    'spaza': '🏪 Spaza / Tuck Shop',
-                    'other': '📌 Other'
-                };
-                const typeLabel = siteTypeLabels[entry.siteType] || entry.siteType;
-                const syncStatus = entry.synced ? '✅ Synced' : '⏳ Pending sync';
-
-                html += `
-                    <div class="entry-item" data-index="${index}">
-                        <div class="entry-info">
-                            <span class="name">${escapeHtml(entry.ownerName)}</span>
-                            <span class="details">${typeLabel} · ${escapeHtml(entry.contactPerson)} · ${escapeHtml(entry.phone)}</span>
-                            <span class="location">📍 ${escapeHtml(entry.area)} · ${escapeHtml(entry.oilVolume || 0)}L cooking oil</span>
-                            ${entry.whatsappGroup ? `<span class="location">💬 ${escapeHtml(entry.whatsappGroup)}</span>` : ''}
-                            ${entry.userName ? `<span class="location">👤 ${escapeHtml(entry.userName)}</span>` : ''}
-                        </div>
-                        <div class="entry-actions">
-                            <span class="entry-status">${syncStatus}</span>
-                            <button class="btn-danger" onclick="deleteEntry(${index})"><i class="fas fa-times"></i></button>
-                        </div>
-                    </div>
-                `;
-            });
-
-            container.innerHTML = html;
-        }
-
-        function escapeHtml(text) {
-            if (!text) return '';
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
-        function updateCounts() {
-            document.getElementById('entryCount').textContent = entries.length + ' entries';
-            document.getElementById('submittedCount').textContent = entries.length + ' entries';
-        }
-
-        function syncEntries() {
-            const pending = entries.filter(e => !e.synced);
-
-            if (pending.length === 0) {
-                showToast('✅ All entries are already synced.', 'success');
-                return;
-            }
-
-            if (isOffline) {
-                showToast('⚠️ You are offline. Entries will sync when you are online.', 'error');
-                return;
-            }
-
-            let syncedCount = 0;
-            pending.forEach((entry, idx) => {
-                submitToEmail(entry, function(success) {
-                    if (success) {
-                        entry.synced = true;
-                        syncedCount++;
-                    }
-                    if (idx === pending.length - 1) {
-                        saveEntries();
-                        showToast(`✅ Synced ${syncedCount} of ${pending.length} entries.`, 'success');
-                    }
-                });
-            });
-        }
-
-        function submitEntry(event) {
-            event.preventDefault();
-
-            const siteType = document.getElementById('siteType').value;
-            const ownerName = document.getElementById('ownerName').value.trim();
-            const contactPerson = document.getElementById('contactPerson').value.trim();
-            const phoneNumber = document.getElementById('phoneNumber').value.trim();
-            const area = document.getElementById('area').value.trim();
-            const address = document.getElementById('address').value.trim();
-            const oilVolume = document.getElementById('oilVolume').value;
-            const engineOil = document.getElementById('engineOil').value || 0;
-            const otherVolume = document.getElementById('otherVolume').value || 0;
-            const wasteType = document.getElementById('wasteType');
-            const wasteTypes = Array.from(wasteType.selectedOptions).map(opt => opt.value);
-            const collectionFrequency = document.getElementById('collectionFrequency').value;
-            const monthlyVolume = document.getElementById('monthlyVolume').value || 0;
-            const disposalMethod = document.getElementById('disposalMethod').value;
-            const notes = document.getElementById('notes').value.trim();
-            const latitude = document.getElementById('latitude').value;
-            const longitude = document.getElementById('longitude').value;
-
-            const whatsappGroup = document.getElementById('whatsappGroup').value.trim();
-            const whatsappAdmin = document.getElementById('whatsappAdmin').value.trim();
-            const securityCompany = document.getElementById('securityCompany').value.trim();
-            const securityContact = document.getElementById('securityContact').value.trim();
-            const policeStation = document.getElementById('policeStation').value.trim();
-            const policeWard = document.getElementById('policeWard').value.trim();
-
-            if (!ownerName || !contactPerson || !phoneNumber || !area || !oilVolume) {
-                showToast('⚠️ Please fill in all required fields.', 'error');
-                return;
-            }
-
-            const userName = currentUser ? (currentUser.displayName || currentUser.email || 'Guest') : 'Anonymous';
-            const userId = currentUser ? (currentUser.uid || currentUser.email || 'unknown') : 'unknown';
-
-            const entry = {
-                id: Date.now(),
-                siteType,
-                ownerName,
-                contactPerson,
-                phone: phoneNumber,
-                area,
-                address,
-                oilVolume: parseInt(oilVolume) || 0,
-                engineOil: parseInt(engineOil) || 0,
-                otherVolume: parseInt(otherVolume) || 0,
-                wasteTypes,
-                collectionFrequency,
-                monthlyVolume: parseInt(monthlyVolume) || 0,
-                disposalMethod,
-                notes,
-                latitude,
-                longitude,
-                whatsappGroup,
-                whatsappAdmin,
-                securityCompany,
-                securityContact,
-                policeStation,
-                policeWard,
-                userId: userId,
-                userName: userName,
-                timestamp: new Date().toISOString(),
-                chsh_s: '2.76',
-                patent: 'SA 2026/05142',
-                status: 'submitted',
-                synced: false
-            };
-
-            entries.push(entry);
-            saveEntries();
-
-            db.collection('entries').doc(entry.id.toString()).set({
-                ...entry,
-                firestoreTimestamp: firebase.firestore.FieldValue.serverTimestamp()
-            }).catch(() => {});
-
-            if (!isOffline) {
-                submitToEmail(entry, function(success) {
-                    if (success) {
-                        entry.synced = true;
-                        saveEntries();
-                    }
-                });
-            } else {
-                showToast('📶 You are offline. Entry saved locally. Will sync when online.', 'info');
-            }
-
-            addCommunityNotice(`📍 New site registered: <strong>${ownerName}</strong> in ${area} — ${oilVolume}L oil collected!`);
-
-            document.getElementById('dataForm').reset();
-            document.getElementById('latitude').value = '';
-            document.getElementById('longitude').value = '';
-
-            if (marker) {
-                map.removeLayer(marker);
-                marker = null;
-            }
-
-            showToast('✅ Entry submitted! Quantum-verified data saved.', 'success');
-        }
-
-        function submitToEmail(entry, callback) {
-            try {
-                const formData = new FormData();
-                formData.append('_subject', 'MindTech Waste Management Engine — New Entry');
-                formData.append('_captcha', 'false');
-                formData.append('_template', 'table');
-                formData.append('Submitted By', entry.userName || 'Anonymous');
-                formData.append('User ID', entry.userId || 'unknown');
-                formData.append('Site Type', entry.siteType);
-                formData.append('Owner Name', entry.ownerName);
-                formData.append('Contact Person', entry.contactPerson);
-                formData.append('Phone Number', entry.phone);
-                formData.append('Area / Community', entry.area);
-                formData.append('Address', entry.address || 'N/A');
-                formData.append('Cooking Oil (L/mo)', entry.oilVolume);
-                formData.append('Engine Oil (L/mo)', entry.engineOil);
-                formData.append('Other Waste (kg/mo)', entry.otherVolume);
-                formData.append('Waste Types', (entry.wasteTypes || []).join(', ') || 'N/A');
-                formData.append('Collection Frequency', entry.collectionFrequency || 'N/A');
-                formData.append('Monthly Volume', entry.monthlyVolume || 'N/A');
-                formData.append('Disposal Method', entry.disposalMethod || 'Not specified');
-                formData.append('Notes', entry.notes || 'N/A');
-                formData.append('Latitude', entry.latitude || 'N/A');
-                formData.append('Longitude', entry.longitude || 'N/A');
-                formData.append('CHSH S', entry.chsh_s);
-                formData.append('Patent', entry.patent);
-                formData.append('Timestamp', entry.timestamp);
-
-                fetch('https://formsubmit.co/mindtech.industriesai@gmail.com', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(() => { if (callback) callback(true); })
-                .catch(() => { if (callback) callback(false); });
-
-            } catch(e) {
-                if (callback) callback(false);
-            }
-        }
-
-        function deleteEntry(index) {
-            if (confirm('Delete this entry?')) {
-                const entry = entries[index];
-                if (entry && entry.id) {
-                    db.collection('entries').doc(entry.id.toString()).delete().catch(() => {});
-                }
-                entries.splice(index, 1);
-                saveEntries();
-                showToast('🗑️ Entry deleted.', 'info');
-            }
-        }
-
-        function clearAllEntries() {
-            if (entries.length === 0) return;
-            if (confirm('Delete ALL entries? This cannot be undone.')) {
-                entries.forEach(entry => {
-                    if (entry && entry.id) {
-                        db.collection('entries').doc(entry.id.toString()).delete().catch(() => {});
-                    }
-                });
-                entries = [];
-                saveEntries();
-                showToast('🗑️ All entries cleared.', 'info');
-            }
-        }
-
-        function exportCSV() {
-            if (entries.length === 0) {
-                showToast('⚠️ No entries to export.', 'error');
-                return;
-            }
-
-            const headers = ['ID', 'Site Type', 'Owner Name', 'Contact Person', 'Phone', 'Area', 'Address',
-                'Cooking Oil (L)', 'Engine Oil (L)', 'Other Waste (kg)', 'Waste Types', 'Collection Frequency',
-                'Monthly Volume', 'Disposal Method', 'Notes', 'Latitude', 'Longitude',
-                'User ID', 'User Name', 'CHSH S', 'Patent', 'Timestamp', 'Status', 'Synced'
-            ];
-
-            let csv = headers.join(',') + '\n';
-
-            entries.forEach(e => {
-                const row = [
-                    e.id,
-                    `"${e.siteType}"`,
-                    `"${e.ownerName}"`,
-                    `"${e.contactPerson}"`,
-                    `"${e.phone}"`,
-                    `"${e.area}"`,
-                    `"${e.address || ''}"`,
-                    e.oilVolume || 0,
-                    e.engineOil || 0,
-                    e.otherVolume || 0,
-                    `"${(e.wasteTypes || []).join('; ')}"`,
-                    `"${e.collectionFrequency || ''}"`,
-                    e.monthlyVolume || 0,
-                    `"${e.disposalMethod || ''}"`,
-                    `"${e.notes || ''}"`,
-                    `"${e.latitude || ''}"`,
-                    `"${e.longitude || ''}"`,
-                    `"${e.userId || ''}"`,
-                    `"${e.userName || ''}"`,
-                    `"${e.chsh_s}"`,
-                    `"${e.patent}"`,
-                    `"${e.timestamp}"`,
-                    `"${e.status}"`,
-                    e.synced ? 'Yes' : 'No'
-                ];
-                csv += row.join(',') + '\n';
-            });
-
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `mindtech_waste_data_${new Date().toISOString().slice(0,10)}.csv`;
-            a.click();
-            URL.revokeObjectURL(url);
-
-            showToast('📊 CSV exported successfully!', 'success');
-        }
-
-        // ============================================================
-        // MAP INITIALIZATION
-        // ============================================================
-        function initMap() {
-            try {
-                map = L.map('map').setView([-26.194, 28.241], 13);
-
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '&copy; OpenStreetMap contributors',
-                    maxZoom: 19
-                }).addTo(map);
-
-                map.on('click', function(e) {
-                    const lat = e.latlng.lat;
-                    const lng = e.latlng.lng;
-
-                    if (marker) map.removeLayer(marker);
-
-                    marker = L.marker([lat, lng]).addTo(map);
-                    marker.bindPopup(`📍 ${lat.toFixed(6)}, ${lng.toFixed(6)}`).openPopup();
-
-                    document.getElementById('latitude').value = lat.toFixed(6);
-                    document.getElementById('longitude').value = lng.toFixed(6);
-
-                    showToast('📍 Pin dropped! Coordinates captured.', 'info');
-                });
-            } catch (error) {
-                console.warn('Map initialization failed:', error);
-            }
-        }
-
-        function showToast(msg, type) {
-            const existing = document.querySelector('.toast');
-            if (existing) existing.remove();
-
-            const div = document.createElement('div');
-            div.className = 'toast';
-            const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : '💡';
-            div.innerHTML = icon + ' ' + msg;
-            document.body.appendChild(div);
-
-            setTimeout(() => {
-                if (div.parentNode) div.remove();
-            }, 3500);
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('registerModal').classList.remove('visible');
-            document.getElementById('collectorRegisterModal').classList.remove('visible');
-            document.getElementById('appContainer').classList.remove('visible');
-            document.getElementById('communitySection').classList.remove('visible');
-
-            initMap();
-            loadEntries();
-            updateOfflineStatus();
-            verifyQuantumState();
-        });
-    </script>
+    <button type="submit" id="submitBtn" class="btn-submit">
+      <i class="fa-solid fa-paper-plane"></i> Submit Payload to Master Ledger
+    </button>
+  </form>
+
+  <!-- ===== MANIFEST OUTPUT ===== -->
+  <div id="manifestOutput"></div>
+
+  <!-- ===== ACTION BAR ===== -->
+  <div class="action-bar">
+    <button class="btn-export" onclick="exportCSV()">
+      <i class="fas fa-file-export"></i> Export CSV
+    </button>
+    <button class="btn-clear" onclick="clearAllEntries()">
+      <i class="fas fa-trash"></i> Clear All
+    </button>
+  </div>
+
+  <!-- ===== ENTRIES LIST ===== -->
+  <div id="entriesList"></div>
+
+  <!-- ===== IMPACT STATS ===== -->
+  <div class="stats-panel">
+    <div>
+      <div class="stat-val" id="statLitres">0</div>
+      <div class="stat-lbl">Litres Oil</div>
+    </div>
+    <div>
+      <div class="stat-val" id="statSites">0</div>
+      <div class="stat-lbl">Registered Sites</div>
+    </div>
+    <div>
+      <div class="stat-val" id="statWeight">0 kg</div>
+      <div class="stat-lbl">E-Waste / Metals</div>
+    </div>
+    <div>
+      <div class="stat-val green" id="statCo2">0 kg</div>
+      <div class="stat-lbl">CO₂ Prevented</div>
+    </div>
+  </div>
+
+  <!-- ===== FOOTER ===== -->
+  <div class="footer-credits">
+    <div class="footer-logos">
+      <img src="https://i.postimg.cc/zXW78GNH/Mind-Tech-Transparent-Logo.png" alt="MindTech Industries" class="footer-logo" onerror="this.style.display='none'">
+      <img src="https://i.postimg.cc/T3ytnBqN/KD-LOGO-IMAGE-removebg-preview.png" alt="KD Concepts" class="footer-logo" onerror="this.style.display='none'">
+      <img src="https://raw.githubusercontent.com/mindtechindustriesai-alt/my-images/main/pelo_community_final_image-removebg-preview.png" alt="PELO Recovery" class="footer-logo" onerror="this.style.display='none'">
+    </div>
+    <div class="quantum">⚛️ CHSH S=2.76 · SA 2026/05142</div>
+    <div style="margin-top:6px;">© 2026 MindTech Waste Management Engine · Powered by MindTech Industries</div>
+    <div style="margin-top:4px; font-size:11px; color:var(--text-muted);">
+      All data flows to: mindtech.industriesai@gmail.com
+    </div>
+  </div>
+</div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+// ============================================================
+// PARTICLES.JS — QUANTUM BACKGROUND
+// ============================================================
+particlesJS('particles-js', {
+  particles: {
+    number: { value: 60, density: { enable: true, value_area: 1000 } },
+    color: { value: ['#38bdf8', '#8B5CF6', '#10b981', '#f59e0b'] },
+    shape: { type: 'circle' },
+    opacity: { value: 0.25, random: true },
+    size: { value: 2.5, random: true },
+    line_linked: { enable: true, distance: 150, color: '#8B5CF6', opacity: 0.08, width: 0.6 },
+    move: { enable: true, speed: 0.6, direction: 'none', random: true, out_mode: 'out' }
+  },
+  interactivity: {
+    events: { onhover: { enable: true, mode: 'repulse' }, onclick: { enable: true, mode: 'push' } }
+  },
+  retina_detect: true
+});
+
+// ============================================================
+// FIREBASE CONFIG
+// ============================================================
+const firebaseConfig = {
+  apiKey: "AIzaSyD5OB59lG6bAsmQ7A97zXP_MfQ5AM3BYaw",
+  authDomain: "mindflow-ai-education.firebaseapp.com",
+  projectId: "mindflow-ai-education",
+  storageBucket: "mindflow-ai-education.firebasestorage.app",
+  messagingSenderId: "157615197603",
+  appId: "1:157615197603:web:540d67781fc55d04c11e16"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+db.settings({ cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED });
+db.enablePersistence({ synchronizeTabs: true }).catch(() => {});
+
+const auth = firebase.auth();
+auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+
+// QUANTUM STATE
+const QUANTUM_STATE = {
+  chsh: 2.76,
+  patent: 'SA 2026/05142',
+  verified: true,
+  timestamp: new Date().toISOString()
+};
+
+// STATE
+let entries = [];
+let map = null;
+let marker = null;
+let isOffline = !navigator.onLine;
+
+// DOM REFS
+const modeInput = document.getElementById('mode');
+const wasteType = document.getElementById('wasteType');
+const gpsCoords = document.getElementById('gpsCoordinates');
+const manifestIdInput = document.getElementById('manifestIdInput');
+const submitBtn = document.getElementById('submitBtn');
+const manifestOutput = document.getElementById('manifestOutput');
+const statusBadge = document.getElementById('statusBadge');
+const offlineIndicator = document.getElementById('offlineIndicator');
+const offlineText = document.getElementById('offlineText');
+const entriesList = document.getElementById('entriesList');
+
+// MAP INITIALIZATION
+function initMap() {
+  map = L.map('map').setView([-26.2041, 28.0473], 10);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+    attribution: '© OpenStreetMap © CARTO'
+  }).addTo(map);
+
+  map.on('click', function(e) {
+    const lat = e.latlng.lat.toFixed(6);
+    const lng = e.latlng.lng.toFixed(6);
+    gpsCoords.value = `${lat}, ${lng}`;
+    if (marker) map.removeLayer(marker);
+    marker = L.marker([lat, lng]).addTo(map)
+      .bindPopup(`📍 ${lat}, ${lng}`).openPopup();
+    showToast('📍 Coordinates captured: ' + lat + ', ' + lng, 'success');
+  });
+}
+
+// VIEW SWITCHER
+function switchView(view) {
+  modeInput.value = view;
+  ['comm', 'ind', 'mindtech'].forEach(t => 
+    document.getElementById('tab-' + t).classList.remove('active')
+  );
+  ['community-fields', 'industrial-fields', 'mindtech-fields'].forEach(f => 
+    document.getElementById(f).style.display = 'none'
+  );
+
+  if (view === 'community') {
+    document.getElementById('tab-comm').classList.add('active');
+    document.getElementById('community-fields').style.display = 'block';
+  } else if (view === 'industrial') {
+    document.getElementById('tab-ind').classList.add('active');
+    document.getElementById('industrial-fields').style.display = 'block';
+  } else {
+    document.getElementById('tab-mindtech').classList.add('active');
+    document.getElementById('mindtech-fields').style.display = 'block';
+  }
+}
+
+// DEMO DATA
+function fillDemoData() {
+  const mode = modeInput.value;
+  if (mode === 'community') {
+    document.getElementById('businessName').value = "City Deep Auto Recyclers";
+    document.getElementById('collectorName').value = "Sipho Nkosi (COL-804)";
+    document.getElementById('contactPhone').value = "+27 82 555 1234";
+    document.getElementById('declaredQty').value = "150.0";
+    document.getElementById('areaCommunity').value = "City Deep Hub";
+    document.getElementById('whatsappGroup').value = "Gauteng Scrap Watch";
+    document.getElementById('securityCompany').value = "Mapogo Security";
+    gpsCoords.value = "-26.205000, 28.048000";
+    showToast('✅ Community demo data loaded', 'success');
+  } else if (mode === 'industrial') {
+    document.getElementById('companyName').value = "Apex Manufacturing SA (Pty) Ltd";
+    document.getElementById('regNumber').value = "2018/592014/07";
+    document.getElementById('indTonnage').value = "12.5";
+    document.getElementById('complianceEmail').value = "compliance@apex.co.za";
+    showToast('✅ Industrial demo data loaded', 'success');
+  } else {
+    manifestIdInput.value = "MNF-" + Date.now() + "-" + Math.floor(Math.random()*1000);
+    document.getElementById('mindtechInspector').value = "MindTech Gate 2 - Officer Mabuza";
+    document.getElementById('verifiedWeight').value = "150.0";
+    document.getElementById('stolenCheck').value = "✅ Verified Match (Legitimate Origin)";
+    showToast('✅ MindTech demo data loaded', 'success');
+  }
+}
+
+// TOAST SYSTEM
+function showToast(msg, type = 'info') {
+  const existing = document.querySelector('.toast');
+  if (existing) existing.remove();
+
+  const div = document.createElement('div');
+  div.className = 'toast ' + type;
+  div.textContent = msg;
+  document.body.appendChild(div);
+
+  setTimeout(() => {
+    if (div.parentNode) div.remove();
+  }, 4000);
+}
+
+// UPDATE STATS
+function updateStats() {
+  const totalOil = entries.reduce((sum, e) => sum + (parseFloat(e.declaredQty) || 0), 0);
+  const totalSites = entries.length;
+  const totalWeight = entries.reduce((sum, e) => sum + (parseFloat(e.declaredQty) || 0), 0);
+  const co2Saved = Math.round(totalOil * 0.8 * 0.75);
+
+  document.getElementById('statLitres').textContent = totalOil.toFixed(0);
+  document.getElementById('statSites').textContent = totalSites;
+  document.getElementById('statWeight').textContent = totalWeight.toFixed(0) + ' kg';
+  document.getElementById('statCo2').textContent = co2Saved + ' kg';
+
+  localStorage.setItem('pelo_master_entries', JSON.stringify(entries));
+  renderEntries();
+}
+
+// RENDER ENTRIES
+function renderEntries() {
+  if (entries.length === 0) {
+    entriesList.innerHTML = '<p style="color:var(--text-muted); font-size:13px; text-align:center; padding:10px;">No ledger entries yet</p>';
+    return;
+  }
+
+  let html = '';
+  const recent = entries.slice(-5).reverse();
+  recent.forEach(e => {
+    html += `
+      <div class="entry-item">
+        <span class="entry-id">${e.manifestId || 'N/A'}</span>
+        <span class="entry-material">${e.materialType || 'N/A'}</span>
+        <span class="entry-status">${e.declaredQty || e.verifiedWeight || 0} ${e.mode === 'mindtech' ? 'kg' : 'L'}</span>
+      </div>
+    `;
+  });
+  entriesList.innerHTML = html;
+}
+
+// GENERATE MANIFEST ID
+function generateManifestId() {
+  const timestamp = Date.now();
+  const random = Math.floor(Math.random() * 10000);
+  return `MNF-${timestamp}-${random.toString().padStart(4, '0')}`;
+}
+
+// SUBMIT TO FIRESTORE
+async function submitToFirestore(entry, retries = 3) {
+  let lastError;
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      const docId = entry.manifestId || generateManifestId();
+      await db.collection('pelo_master_ledger').doc(docId).set({
+        ...entry,
+        firestoreTimestamp: firebase.firestore.FieldValue.serverTimestamp(),
+        quantumState: QUANTUM_STATE,
+        chsh_s: '2.76',
+        patent: 'SA 2026/05142',
+        source: 'pelo_master_system',
+        status: 'submitted'
+      }, { merge: true });
+      return { success: true, docId };
+    } catch (err) {
+      lastError = err;
+      if (attempt < retries) {
+        const delay = Math.pow(2, attempt) * 1000;
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+  }
+  return { success: false, error: lastError.message };
+}
+
+// FORM SUBMISSION
+document.getElementById('unifiedPeloForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  
+  const mode = modeInput.value;
+  const manifestId = (mode === 'mindtech' && manifestIdInput.value) ? manifestIdInput.value : generateManifestId();
+  
+  const payload = {
+    mode: mode,
+    manifestId: manifestId,
+    timestamp: new Date().toISOString(),
+    materialType: wasteType.value,
+    gpsCoordinates: gpsCoords.value,
+    chsh_s: '2.76',
+    patent: 'SA 2026/05142'
+  };
+
+  if (mode === 'community') {
+    payload.siteType = document.getElementById('siteType').value;
+    payload.businessName = document.getElementById('businessName').value.trim();
+    payload.collectorName = document.getElementById('collectorName').value.trim();
+    payload.contactPhone = document.getElementById('contactPhone').value.trim();
+    payload.declaredQty = parseFloat(document.getElementById('declaredQty').value) || 0;
+    payload.areaCommunity = document.getElementById('areaCommunity').value.trim();
+    payload.whatsappGroup = document.getElementById('whatsappGroup').value.trim();
+    payload.securityCompany = document.getElementById('securityCompany').value.trim();
+  } else if (mode === 'industrial') {
+    payload.companyName = document.getElementById('companyName').value.trim();
+    payload.regNumber = document.getElementById('regNumber').value.trim();
+    payload.declaredQty = parseFloat(document.getElementById('indTonnage').value) || 0;
+    payload.complianceEmail = document.getElementById('complianceEmail').value.trim();
+  } else {
+    payload.mindtechInspector = document.getElementById('mindtechInspector').value.trim();
+    payload.verifiedWeight = parseFloat(document.getElementById('verifiedWeight').value) || 0;
+    payload.stolenVerificationStatus = document.getElementById('stolenCheck').value;
+  }
+
+  submitBtn.disabled = true;
+  submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Submitting to Master Ledger...';
+
+  try {
+    const result = await submitToFirestore(payload);
+    
+    if (result.success) {
+      entries.push(payload);
+      updateStats();
+
+      manifestOutput.style.display = 'block';
+      manifestOutput.innerHTML = `
+        <div style="font-size:14px; font-weight:700; margin-bottom:10px; color:var(--accent-green);">
+          ✅ PAYLOAD REGISTERED IN MASTER LEDGER
+        </div>
+        <div style="font-size:13px; margin-bottom:6px;">
+          <span style="color:var(--text-muted);">MANIFEST ID:</span> 
+          <span style="color:var(--accent-cyan);">${payload.manifestId}</span>
+        </div>
+        <div style="font-size:13px; margin-bottom:6px;">
+          <span style="color:var(--text-muted);">MATERIAL:</span> 
+          <span style="color:var(--text-primary);">${payload.materialType}</span>
+        </div>
+        <div style="font-size:12px; color:var(--text-muted); margin-top:10px; border-top:1px solid var(--card-border); padding-top:10px;">
+          ⚛️ CHSH S=2.76 · SA 2026/05142
+        </div>
+      `;
+
+      showToast(`✅ Manifest ${payload.manifestId} registered!`, 'success');
+      document.getElementById('unifiedPeloForm').reset();
+      document.getElementById('gpsCoordinates').value = '';
+
+      if (marker) {
+        map.removeLayer(marker);
+        marker = null;
+      }
+    } else {
+      showToast('❌ Firestore error: ' + result.error, 'error');
+    }
+  } catch (err) {
+    showToast('❌ Submission error: ' + err.message, 'error');
+  }
+
+  submitBtn.disabled = false;
+  submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Submit Payload to Master Ledger';
+});
+
+// EXPORT CSV
+function exportCSV() {
+  if (entries.length === 0) {
+    showToast('⚠️ No entries to export.', 'error');
+    return;
+  }
+
+  const headers = ['Manifest ID', 'Mode', 'Material', 'Quantity', 'Area/Business', 'GPS', 'Timestamp', 'CHSH S'];
+  let csv = headers.join(',') + '\n';
+
+  entries.forEach(e => {
+    const row = [
+      e.manifestId || '',
+      e.mode || '',
+      `"${e.materialType || ''}"`,
+      e.declaredQty || e.verifiedWeight || 0,
+      `"${e.areaCommunity || e.companyName || e.mindtechInspector || ''}"`,
+      `"${e.gpsCoordinates || ''}"`,
+      e.timestamp || '',
+      e.chsh_s || '2.76'
+    ];
+    csv += row.join(',') + '\n';
+  });
+
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `pelo_manifest_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('📊 CSV exported successfully!', 'success');
+}
+
+// CLEAR ALL
+function clearAllEntries() {
+  if (entries.length === 0) return;
+  if (confirm('Delete ALL entries? This cannot be undone.')) {
+    entries = [];
+    localStorage.removeItem('pelo_master_entries');
+    updateStats();
+    showToast('🗑️ All entries cleared.', 'warning');
+  }
+}
+
+// OFFLINE MONITORING
+function updateOfflineStatus() {
+  isOffline = !navigator.onLine;
+  if (isOffline) {
+    offlineIndicator.classList.add('visible');
+    statusBadge.textContent = '🔴 OFFLINE';
+    statusBadge.style.background = 'rgba(244, 63, 94, 0.15)';
+    statusBadge.style.color = 'var(--accent-rose)';
+  } else {
+    offlineIndicator.classList.remove('visible');
+    statusBadge.textContent = '🟢 ONLINE';
+    statusBadge.style.background = 'rgba(16, 185, 129, 0.15)';
+    statusBadge.style.color = 'var(--accent-green)';
+  }
+}
+
+window.addEventListener('online', updateOfflineStatus);
+window.addEventListener('offline', updateOfflineStatus);
+
+// INIT
+document.addEventListener('DOMContentLoaded', function() {
+  initMap();
+  updateOfflineStatus();
+
+  const saved = localStorage.getItem('pelo_master_entries');
+  if (saved) {
+    try {
+      entries = JSON.parse(saved);
+      updateStats();
+    } catch(e) {}
+  }
+
+  console.log('🚀 MindTech Waste Management Engine v2.0');
+  console.log('   ⚛️ QUANTUM BACKEND: CHSH S=2.76 · SA 2026/05142');
+  console.log('   📧 ALL data flows to: mindtech.industriesai@gmail.com');
+  console.log('   🔐 Quantum-verified chain-of-custody');
+  console.log('   🌍 Built in Africa, for Africa');
+});
+</script>
+
 </body>
 </html>
