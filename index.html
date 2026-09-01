@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Mindtech Waste Management Engine</title>
+    <title>MindTech Waste Management Engine</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -732,17 +732,33 @@
     ============================================================ -->
     <div id="loginOverlay">
         <div class="login-card">
-            <img src="https://raw.githubusercontent.com/mindtechindustriesai-alt/my-images/main/pelo_community_final_image-removebg-preview.png" alt="Mindtech Waste Management Engine" class="login-logo" onerror="this.src='https://i.postimg.cc/T114NczG/pelo-recovery-image-removebg-preview.png'">
-            <div class="login-title">Mindtech Waste Management Engine</div>
+            <img src="https://i.postimg.cc/zXW78GNH/Mind-Tech-Transparent-Logo.png" alt="MindTech Waste Management Engine" class="login-logo" onerror="this.src='https://i.postimg.cc/zXW78GNH/Mind-Tech-Transparent-Logo.png'">
+            <div class="login-title">MindTech Waste Management Engine</div>
             <div class="login-subtitle">PELO · Community Collection Network</div>
 
+            <!-- GOOGLE SIGN-IN -->
             <button class="btn-login btn-google" id="googleSignInBtn">
                 <i class="fab fa-google" style="font-size:1.1rem;"></i> Sign in with Google
             </button>
 
+            <!-- DIRECT CREDENTIAL LOGIN (DEO / MINDTECH PARTNER) -->
+            <form id="directLoginForm" onsubmit="handleDirectLogin(event)" style="margin-top: 14px;">
+                <div class="form-group" style="text-align: left;">
+                    <label style="color: var(--pelo-gold); font-size: 0.6rem;">Username / Partner Name</label>
+                    <input type="text" id="loginUsername" placeholder="e.g. DEO or MindTech Partner" required style="padding: 10px; font-size: 0.8rem;">
+                </div>
+                <div class="form-group" style="text-align: left;">
+                    <label style="color: var(--pelo-gold); font-size: 0.6rem;">Password (Default: 12345)</label>
+                    <input type="password" id="loginPassword" placeholder="Enter password" required style="padding: 10px; font-size: 0.8rem;">
+                </div>
+                <button type="submit" class="btn-login btn-demo" style="margin-top: 6px;">
+                    <i class="fas fa-sign-in-alt"></i> Login with Password
+                </button>
+            </form>
+
             <div class="login-divider">or</div>
 
-            <button class="btn-login btn-demo" id="demoLoginBtn">
+            <button class="btn-login btn-demo" id="demoLoginBtn" style="background: rgba(0, 180, 216, 0.2); border: 1px solid var(--primary);">
                 <i class="fas fa-user-astronaut"></i> Continue as Guest (Demo)
             </button>
 
@@ -849,7 +865,7 @@
         <header class="header">
             <img src="https://i.postimg.cc/zXW78GNH/Mind-Tech-Transparent-Logo.png" alt="MindTech Industries" class="header-logo" onerror="this.src='https://i.postimg.cc/zXW78GNH/Mind-Tech-Transparent-Logo.png'">
             <div class="header-text">
-                <h1>Mindtech Waste Management Engine</h1>
+                <h1>MindTech Waste Management Engine</h1>
                 <p>PELO · Community Collection Network</p>
             </div>
             <span class="header-badge">⚛️ CHSH S=2.76</span>
@@ -1194,7 +1210,7 @@
                 <img src="https://raw.githubusercontent.com/mindtechindustriesai-alt/my-images/main/pelo_community_final_image-removebg-preview.png" alt="PELO Recovery" class="footer-logo" onerror="this.style.display='none'">
             </div>
             <div class="quantum-line">⚛️ CHSH S=2.76 · SA 2026/05142</div>
-            <div class="copyright">© 2026 Mindtech Waste Management Engine · Powered by MindTech Industries</div>
+            <div class="copyright">© 2026 MindTech Waste Management Engine · Powered by MindTech Industries</div>
         </div>
 
     </div>
@@ -1204,7 +1220,7 @@
     ============================================================ -->
     <script>
         // ============================================================
-        // FIREBASE CONFIG — FROM ENV VARS (Hardcoded for now)
+        // FIREBASE CONFIG — FROM ENV VARS
         // ============================================================
         const firebaseConfig = {
             apiKey: "AIzaSyD5OB59lG6bAsmQ7A97zXP_MfQ5AM3BYaw",
@@ -1230,7 +1246,6 @@
             timestamp: new Date().toISOString()
         };
 
-        // Store quantum state in Firestore
         function saveQuantumState() {
             db.collection('quantum_state').doc('pelo_system').set({
                 ...QUANTUM_STATE,
@@ -1238,7 +1253,6 @@
             }).catch(() => {});
         }
 
-        // Verify quantum state from Firestore
         async function verifyQuantumState() {
             try {
                 const doc = await db.collection('quantum_state').doc('pelo_system').get();
@@ -1288,24 +1302,17 @@
             } else if (screen === 'app') {
                 loginOverlay.classList.add('hidden');
                 appContainer.classList.add('visible');
-                // Show community section if user is registered/authenticated
                 checkAndShowCommunity();
             }
         }
 
-        // ============================================================
-        // COMMUNITY SECTION — SHOW ONLY IF REGISTERED
-        // ============================================================
         function checkAndShowCommunity() {
             const communitySection = document.getElementById('communitySection');
-            if (currentUser && (isDemo || !isDemo)) {
-                // Show community section for all logged-in users
+            if (currentUser) {
                 communitySection.classList.add('visible');
                 updateEnvironmentalStats();
-                console.log('🌍 Community section visible for:', currentUser.displayName || currentUser.email);
             } else {
                 communitySection.classList.remove('visible');
-                console.log('🔒 Community section hidden — user not logged in');
             }
         }
 
@@ -1325,7 +1332,7 @@
         // AUTH FUNCTIONS
         // ============================================================
         function loginWithGoogle() {
-            loginError.textContent = '⏳ Signing in...';
+            loginError.textContent = '⏳ Signing in with Google...';
             const provider = new firebase.auth.GoogleAuthProvider();
             auth.signInWithPopup(provider)
                 .then((result) => {
@@ -1343,6 +1350,37 @@
                 .catch((error) => {
                     loginError.textContent = '❌ ' + error.message;
                 });
+        }
+
+        // DIRECT LOGIN FOR DEO & MINDTECH PARTNER (DEFAULT PASSWORD 12345)
+        function handleDirectLogin(event) {
+            event.preventDefault();
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value.trim();
+
+            if (!username || !password) {
+                loginError.textContent = '⚠️ Please enter both username and password.';
+                return;
+            }
+
+            if (password !== '12345') {
+                loginError.textContent = '❌ Invalid password. Use default password: 12345';
+                return;
+            }
+
+            currentUser = {
+                uid: 'user_' + username.toLowerCase().replace(/\s+/g, '_'),
+                displayName: username,
+                email: username.toLowerCase().replace(/\s+/g, '') + '@mindtech.internal'
+            };
+            isDemo = false;
+            authResolved = true;
+            loginError.textContent = '';
+            document.getElementById('userNameDisplay').textContent = '👤 ' + currentUser.displayName;
+            showScreen('app');
+            loadEntries();
+            saveQuantumState();
+            showToast('✅ Welcome, ' + currentUser.displayName + '!');
         }
 
         function loginAsDemo() {
@@ -1368,7 +1406,6 @@
                 return;
             }
 
-            // Submit to email
             const formData = new FormData();
             formData.append('_subject', 'PELO Registration — New User');
             formData.append('_captcha', 'false');
@@ -1379,14 +1416,12 @@
             formData.append('email', email);
             formData.append('phone', phone);
             formData.append('area', area);
-            formData.append('source', 'Registration Modal');
 
             fetch('https://formsubmit.co/mindtech.industriesai@gmail.com', {
                 method: 'POST',
                 body: formData
             }).catch(() => {});
 
-            // Save to Firestore
             db.collection('users').doc(email).set({
                 name: name,
                 email: email,
@@ -1399,7 +1434,7 @@
             .then(() => {
                 document.getElementById('registerError').textContent = '';
                 currentUser = { uid: 'registered_' + email, displayName: name, email: email };
-                isDemo = true;
+                isDemo = false;
                 authResolved = true;
                 document.getElementById('userNameDisplay').textContent = '👤 ' + name;
                 showScreen('app');
@@ -1426,7 +1461,6 @@
                 return;
             }
 
-            // Save collector to Firestore
             db.collection('collectors').doc(email).set({
                 name: name,
                 email: email,
@@ -1487,23 +1521,17 @@
                 loadEntries();
                 loadUserData();
                 verifyQuantumState();
-                console.log('✅ Session restored for:', user.email);
             } else {
-                if (!isDemo) {
+                if (!isDemo && !currentUser) {
                     showScreen('login');
-                    console.log('🔐 No session, showing login screen');
                 }
             }
         });
 
-        // ============================================================
-        // TIMEOUT FALLBACK
-        // ============================================================
         setTimeout(() => {
             if (!authResolved) {
                 authResolved = true;
                 showScreen('login');
-                console.log('⏱️ Auth timeout: showing login screen');
             }
         }, 3000);
 
@@ -1519,7 +1547,7 @@
         logoutBtn.addEventListener('click', logout);
 
         // ============================================================
-        // ENVIRONMENTAL IMPACT STATS
+        // STATS & NOTICES
         // ============================================================
         function updateEnvironmentalStats() {
             const totalOil = entries.reduce((sum, e) => sum + (parseInt(e.oilVolume) || 0), 0);
@@ -1533,9 +1561,6 @@
             document.getElementById('totalCO2Saved').textContent = co2Saved + 'kg';
         }
 
-        // ============================================================
-        // COMMUNITY ENQUIRY FORM HANDLER
-        // ============================================================
         function submitEnquiry(event) {
             event.preventDefault();
             const form = document.getElementById('communityEnquiryForm');
@@ -1569,9 +1594,6 @@
             });
         }
 
-        // ============================================================
-        // COMMUNITY NOTICE BOARD
-        // ============================================================
         function addCommunityNotice(notice) {
             const board = document.getElementById('noticeBoard');
             const p = document.createElement('p');
@@ -1583,7 +1605,7 @@
         }
 
         // ============================================================
-        // OFFLINE DETECTION
+        // OFFLINE & STORAGE MANAGEMENT
         // ============================================================
         function updateOfflineStatus() {
             isOffline = !navigator.onLine;
@@ -1604,9 +1626,6 @@
         window.addEventListener('online', updateOfflineStatus);
         window.addEventListener('offline', updateOfflineStatus);
 
-        // ============================================================
-        // LOAD ENTRIES
-        // ============================================================
         function loadEntries() {
             try {
                 const saved = localStorage.getItem('pelo_data_entries');
@@ -1633,9 +1652,6 @@
             }
         }
 
-        // ============================================================
-        // RENDER ENTRIES
-        // ============================================================
         function renderEntries() {
             const container = document.getElementById('entriesList');
 
@@ -1691,17 +1707,11 @@
             return div.innerHTML;
         }
 
-        // ============================================================
-        // UPDATE COUNTS
-        // ============================================================
         function updateCounts() {
             document.getElementById('entryCount').textContent = entries.length + ' entries';
             document.getElementById('submittedCount').textContent = entries.length + ' entries';
         }
 
-        // ============================================================
-        // SYNC ENTRIES
-        // ============================================================
         function syncEntries() {
             const pending = entries.filter(e => !e.synced);
 
@@ -1730,9 +1740,6 @@
             });
         }
 
-        // ============================================================
-        // SUBMIT ENTRY — WITH USER IDENTIFICATION
-        // ============================================================
         function submitEntry(event) {
             event.preventDefault();
 
@@ -1766,7 +1773,6 @@
                 return;
             }
 
-            // Get user info
             const userName = currentUser ? (currentUser.displayName || currentUser.email || 'Guest') : 'Anonymous';
             const userId = currentUser ? (currentUser.uid || currentUser.email || 'unknown') : 'unknown';
 
@@ -1806,13 +1812,11 @@
             entries.push(entry);
             saveEntries();
 
-            // Save to Firestore
             db.collection('entries').doc(entry.id.toString()).set({
                 ...entry,
                 firestoreTimestamp: firebase.firestore.FieldValue.serverTimestamp()
             }).catch(() => {});
 
-            // Submit to email
             if (!isOffline) {
                 submitToEmail(entry, function(success) {
                     if (success) {
@@ -1824,24 +1828,11 @@
                 showToast('📶 You are offline. Entry saved locally. Will sync when online.', 'info');
             }
 
-            // Add to notice board
             addCommunityNotice(`📍 New site registered: <strong>${ownerName}</strong> in ${area} — ${oilVolume}L oil collected!`);
 
-            // Reset form
             document.getElementById('dataForm').reset();
             document.getElementById('latitude').value = '';
             document.getElementById('longitude').value = '';
-            document.getElementById('oilVolume').value = '';
-            document.getElementById('engineOil').value = '';
-            document.getElementById('otherVolume').value = '';
-            document.getElementById('monthlyVolume').value = '';
-            document.getElementById('notes').value = '';
-            document.getElementById('whatsappGroup').value = '';
-            document.getElementById('whatsappAdmin').value = '';
-            document.getElementById('securityCompany').value = '';
-            document.getElementById('securityContact').value = '';
-            document.getElementById('policeStation').value = '';
-            document.getElementById('policeWard').value = '';
 
             if (marker) {
                 map.removeLayer(marker);
@@ -1851,13 +1842,10 @@
             showToast('✅ Entry submitted! Quantum-verified data saved.', 'success');
         }
 
-        // ============================================================
-        // SUBMIT TO EMAIL VIA FORMSUBMIT
-        // ============================================================
         function submitToEmail(entry, callback) {
             try {
                 const formData = new FormData();
-                formData.append('_subject', 'PELO Data Collection — New Entry');
+                formData.append('_subject', 'MindTech Waste Management Engine — New Entry');
                 formData.append('_captcha', 'false');
                 formData.append('_template', 'table');
                 formData.append('Submitted By', entry.userName || 'Anonymous');
@@ -1878,37 +1866,22 @@
                 formData.append('Notes', entry.notes || 'N/A');
                 formData.append('Latitude', entry.latitude || 'N/A');
                 formData.append('Longitude', entry.longitude || 'N/A');
-                formData.append('WhatsApp Group', entry.whatsappGroup || 'N/A');
-                formData.append('WhatsApp Admin', entry.whatsappAdmin || 'N/A');
-                formData.append('Security Company', entry.securityCompany || 'N/A');
-                formData.append('Security Contact', entry.securityContact || 'N/A');
-                formData.append('Police Station', entry.policeStation || 'N/A');
-                formData.append('Police Ward Cell', entry.policeWard || 'N/A');
                 formData.append('CHSH S', entry.chsh_s);
                 formData.append('Patent', entry.patent);
                 formData.append('Timestamp', entry.timestamp);
-                formData.append('Entry ID', entry.id);
 
                 fetch('https://formsubmit.co/mindtech.industriesai@gmail.com', {
                     method: 'POST',
                     body: formData
                 })
-                .then(() => {
-                    if (callback) callback(true);
-                })
-                .catch(() => {
-                    if (callback) callback(false);
-                });
+                .then(() => { if (callback) callback(true); })
+                .catch(() => { if (callback) callback(false); });
 
             } catch(e) {
-                console.warn('Email submit error:', e);
                 if (callback) callback(false);
             }
         }
 
-        // ============================================================
-        // DELETE ENTRY
-        // ============================================================
         function deleteEntry(index) {
             if (confirm('Delete this entry?')) {
                 const entry = entries[index];
@@ -1921,14 +1894,8 @@
             }
         }
 
-        // ============================================================
-        // CLEAR ALL ENTRIES
-        // ============================================================
         function clearAllEntries() {
-            if (entries.length === 0) {
-                showToast('No entries to clear.', 'info');
-                return;
-            }
+            if (entries.length === 0) return;
             if (confirm('Delete ALL entries? This cannot be undone.')) {
                 entries.forEach(entry => {
                     if (entry && entry.id) {
@@ -1941,9 +1908,6 @@
             }
         }
 
-        // ============================================================
-        // EXPORT CSV
-        // ============================================================
         function exportCSV() {
             if (entries.length === 0) {
                 showToast('⚠️ No entries to export.', 'error');
@@ -1953,9 +1917,7 @@
             const headers = ['ID', 'Site Type', 'Owner Name', 'Contact Person', 'Phone', 'Area', 'Address',
                 'Cooking Oil (L)', 'Engine Oil (L)', 'Other Waste (kg)', 'Waste Types', 'Collection Frequency',
                 'Monthly Volume', 'Disposal Method', 'Notes', 'Latitude', 'Longitude',
-                'WhatsApp Group', 'WhatsApp Admin', 'Security Company', 'Security Contact',
-                'Police Station', 'Police Ward Cell', 'User ID', 'User Name',
-                'CHSH S', 'Patent', 'Timestamp', 'Status', 'Synced'
+                'User ID', 'User Name', 'CHSH S', 'Patent', 'Timestamp', 'Status', 'Synced'
             ];
 
             let csv = headers.join(',') + '\n';
@@ -1979,12 +1941,6 @@
                     `"${e.notes || ''}"`,
                     `"${e.latitude || ''}"`,
                     `"${e.longitude || ''}"`,
-                    `"${e.whatsappGroup || ''}"`,
-                    `"${e.whatsappAdmin || ''}"`,
-                    `"${e.securityCompany || ''}"`,
-                    `"${e.securityContact || ''}"`,
-                    `"${e.policeStation || ''}"`,
-                    `"${e.policeWard || ''}"`,
                     `"${e.userId || ''}"`,
                     `"${e.userName || ''}"`,
                     `"${e.chsh_s}"`,
@@ -2000,7 +1956,7 @@
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `pelo_data_${new Date().toISOString().slice(0,10)}.csv`;
+            a.download = `mindtech_waste_data_${new Date().toISOString().slice(0,10)}.csv`;
             a.click();
             URL.revokeObjectURL(url);
 
@@ -2008,11 +1964,9 @@
         }
 
         // ============================================================
-        // MAP
+        // MAP INITIALIZATION
         // ============================================================
         function initMap() {
-            const container = document.getElementById('map');
-
             try {
                 map = L.map('map').setView([-26.194, 28.241], 13);
 
@@ -2025,9 +1979,7 @@
                     const lat = e.latlng.lat;
                     const lng = e.latlng.lng;
 
-                    if (marker) {
-                        map.removeLayer(marker);
-                    }
+                    if (marker) map.removeLayer(marker);
 
                     marker = L.marker([lat, lng]).addTo(map);
                     marker.bindPopup(`📍 ${lat.toFixed(6)}, ${lng.toFixed(6)}`).openPopup();
@@ -2037,38 +1989,11 @@
 
                     showToast('📍 Pin dropped! Coordinates captured.', 'info');
                 });
-
-                console.log('🗺️ Map initialized');
-
             } catch (error) {
-                console.warn('Map error:', error);
-                container.innerHTML = `
-                    <div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-secondary);font-size:0.75rem;flex-direction:column;gap:10px;">
-                        <i class="fas fa-map" style="font-size:1.8rem;opacity:0.3;"></i>
-                        <p>Map loading... Click below to add coordinates manually.</p>
-                        <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
-                            <input type="text" id="manualLat" placeholder="Latitude" style="padding:6px 10px;background:rgba(0,0,0,0.3);border:1px solid var(--glass-border);border-radius:8px;color:white;width:100px;">
-                            <input type="text" id="manualLng" placeholder="Longitude" style="padding:6px 10px;background:rgba(0,0,0,0.3);border:1px solid var(--glass-border);border-radius:8px;color:white;width:100px;">
-                            <button onclick="setManualCoords()" style="padding:6px 14px;background:var(--pelo-gold);border:none;border-radius:8px;color:#000;font-weight:600;cursor:pointer;">Set</button>
-                        </div>
-                    </div>
-                `;
+                console.warn('Map initialization failed:', error);
             }
         }
 
-        function setManualCoords() {
-            const lat = document.getElementById('manualLat')?.value;
-            const lng = document.getElementById('manualLng')?.value;
-            if (lat && lng) {
-                document.getElementById('latitude').value = lat;
-                document.getElementById('longitude').value = lng;
-                showToast('📍 Coordinates set manually.', 'info');
-            }
-        }
-
-        // ============================================================
-        // TOAST
-        // ============================================================
         function showToast(msg, type) {
             const existing = document.querySelector('.toast');
             if (existing) existing.remove();
@@ -2084,9 +2009,6 @@
             }, 3500);
         }
 
-        // ============================================================
-        // INIT
-        // ============================================================
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('registerModal').classList.remove('visible');
             document.getElementById('collectorRegisterModal').classList.remove('visible');
@@ -2097,19 +2019,7 @@
             loadEntries();
             updateOfflineStatus();
             verifyQuantumState();
-
-            console.log('🚀 Mindtech Waste Management Engine v3.0 — FULL INTEGRATION');
-            console.log('   ⚛️ QUANTUM BACKEND: CHSH S=2.76 · SA 2026/05142');
-            console.log('   📧 ALL forms submit to: mindtech.industriesai@gmail.com');
-            console.log('   📍 Registration includes Area field');
-            console.log('   👤 Collector Registration inside app');
-            console.log('   🔐 Community section visible ONLY after login/registration');
-            console.log('   🌍 Environmental Impact Stats');
-            console.log('   📶 Offline capable — auto-sync');
-            console.log('   💬 Community Notice Board');
-            console.log('   🗄️ Firestore: All logs stored with user identification');
         });
     </script>
-
 </body>
 </html>
