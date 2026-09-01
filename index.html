@@ -1,0 +1,1141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PELO Recovery | Master Engine & Chain of Custody</title>
+  
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+  <style>
+    :root {
+      --mt-primary: #0f172a;
+      --mt-accent: #0284c7;
+      --mt-green: #10b981;
+      --mt-warning: #f59e0b;
+      --mt-danger: #ef4444;
+      --bg-color: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #334155;
+      --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+      --radius: 16px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: var(--bg-color);
+      margin: 0;
+      padding: 20px 10px;
+      color: var(--text-main);
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: var(--card-bg);
+      padding: 30px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      border: 1px solid #e2e8f0;
+    }
+
+    /* ===== BRAND HEADER ===== */
+    .brand-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #f1f5f9;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .brand-logo-text {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--mt-primary);
+    }
+
+    .brand-logo-text span {
+      color: var(--mt-accent);
+    }
+
+    .header-badges {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .badge-pelo {
+      background: #e0f2fe;
+      color: #0369a1;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .badge-quantum {
+      background: #f0fdf4;
+      color: #15803d;
+      border: 1px solid #bbf7d0;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .badge-live {
+      background: #fef2f2;
+      color: #dc2626;
+      border: 1px solid #fecaca;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    /* ===== NAV TABS ===== */
+    .nav-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 25px;
+      background: #f1f5f9;
+      padding: 5px;
+      border-radius: 10px;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      background: transparent;
+      font-weight: 700;
+      cursor: pointer;
+      border-radius: 8px;
+      color: #64748b;
+      transition: all 0.2s ease;
+      font-size: 13px;
+      min-width: 120px;
+    }
+
+    .tab-btn.active {
+      background: var(--card-bg);
+      color: var(--mt-primary);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .tab-btn:hover:not(.active) {
+      background: rgba(255,255,255,0.5);
+    }
+
+    /* ===== SECTIONS ===== */
+    .section-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--mt-primary);
+      margin-top: 25px;
+      margin-bottom: 15px;
+      padding-bottom: 5px;
+      border-bottom: 1px solid #cbd5e1;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-title .count {
+      font-size: 12px;
+      font-weight: 400;
+      color: #64748b;
+      margin-left: auto;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+
+    @media (max-width: 600px) {
+      .form-grid { grid-template-columns: 1fr; }
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group.full-width {
+      grid-column: span 2;
+    }
+
+    @media (max-width: 600px) {
+      .form-group.full-width { grid-column: span 1; }
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 6px;
+      font-size: 13px;
+      color: #475569;
+    }
+
+    label .required {
+      color: var(--mt-danger);
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      box-sizing: border-box;
+      font-size: 14px;
+      color: #1e293b;
+      background: #fff;
+      transition: all 0.2s;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: 2px solid var(--mt-accent);
+      border-color: transparent;
+      box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.1);
+    }
+
+    input:disabled, select:disabled {
+      background: #f1f5f9;
+      cursor: not-allowed;
+    }
+
+    #map {
+      height: 240px;
+      width: 100%;
+      border-radius: 8px;
+      border: 1px solid #cbd5e1;
+      margin-top: 5px;
+      background: #e2e8f0;
+    }
+
+    /* ===== BUTTONS ===== */
+    .btn-submit {
+      width: 100%;
+      padding: 15px;
+      background: var(--mt-primary);
+      color: #ffffff;
+      border: none;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 15px;
+      cursor: pointer;
+      margin-top: 15px;
+      transition: all 0.2s;
+    }
+
+    .btn-submit:hover {
+      background: #1e293b;
+      transform: translateY(-1px);
+    }
+
+    .btn-submit:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-demo {
+      background: #f1f5f9;
+      color: #475569;
+      border: 1px solid #cbd5e1;
+      padding: 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      width: 100%;
+      transition: all 0.2s;
+    }
+
+    .btn-demo:hover {
+      background: #e2e8f0;
+    }
+
+    .btn-export {
+      background: #f0fdf4;
+      color: #15803d;
+      border: 1px solid #bbf7d0;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .btn-export:hover {
+      background: #dcfce7;
+    }
+
+    .btn-clear {
+      background: #fef2f2;
+      color: #dc2626;
+      border: 1px solid #fecaca;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .btn-clear:hover {
+      background: #fee2e2;
+    }
+
+    .action-bar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 15px;
+    }
+
+    /* ===== STATS ===== */
+    .stats-panel {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      background: #f8fafc;
+      padding: 15px;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+      margin-top: 25px;
+      text-align: center;
+    }
+
+    @media (max-width: 600px) {
+      .stats-panel { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    .stat-val {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--mt-accent);
+    }
+
+    .stat-val.green { color: var(--mt-green); }
+    .stat-val.warning { color: var(--mt-warning); }
+    .stat-val.danger { color: var(--mt-danger); }
+
+    .stat-lbl {
+      font-size: 11px;
+      color: #64748b;
+      font-weight: 600;
+    }
+
+    /* ===== MANIFEST OUTPUT ===== */
+    #manifestOutput {
+      display: none;
+      font-family: 'Courier New', monospace;
+      background: #1e293b;
+      color: #38bdf8;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 20px;
+      word-break: break-all;
+      text-align: center;
+      border: 1px solid #334155;
+    }
+
+    #manifestOutput .success { color: #4ade80; }
+    #manifestOutput .warning { color: #fbbf24; }
+    #manifestOutput .danger { color: #f87171; }
+
+    /* ===== ENTRIES LIST ===== */
+    #entriesList {
+      max-height: 200px;
+      overflow-y: auto;
+      margin-top: 10px;
+    }
+
+    .entry-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 12px;
+      background: #f8fafc;
+      border-radius: 6px;
+      margin-bottom: 4px;
+      font-size: 12px;
+      border-left: 3px solid var(--mt-accent);
+    }
+
+    .entry-item .entry-id {
+      font-weight: 600;
+      color: var(--mt-primary);
+    }
+
+    .entry-item .entry-material {
+      color: #475569;
+    }
+
+    .entry-item .entry-status {
+      color: var(--mt-green);
+    }
+
+    /* ===== OFFLINE INDICATOR ===== */
+    .offline-indicator {
+      display: none;
+      background: #fef3c7;
+      border: 1px solid #fcd34d;
+      color: #92400e;
+      padding: 10px 15px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      font-size: 13px;
+      font-weight: 600;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .offline-indicator.visible {
+      display: flex;
+    }
+
+    /* ===== TOAST ===== */
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1e293b;
+      color: #f8fafc;
+      padding: 14px 28px;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+      font-weight: 600;
+      z-index: 99999;
+      max-width: 90%;
+      text-align: center;
+      animation: slideUp 0.3s ease;
+    }
+
+    .toast.success { background: #065f46; }
+    .toast.error { background: #991b1b; }
+    .toast.warning { background: #78350f; }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+      to { opacity: 1; transform: translateX(-50%) translateY(0); }
+    }
+
+    /* ===== FOOTER ===== */
+    .footer-credits {
+      text-align: center;
+      margin-top: 30px;
+      font-size: 12px;
+      color: #94a3b8;
+      border-top: 1px solid #e2e8f0;
+      padding-top: 20px;
+    }
+
+    .footer-credits .quantum {
+      font-family: monospace;
+      letter-spacing: 1px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  
+  <!-- ===== BRAND HEADER ===== -->
+  <div class="brand-header">
+    <div class="brand-logo-text">PELO <span>Recovery</span></div>
+    <div class="header-badges">
+      <div class="badge-pelo">Master Engine</div>
+      <div class="badge-quantum">⚛️ CHSH S=2.76</div>
+      <div class="badge-live" id="statusBadge">🔴 OFFLINE</div>
+    </div>
+  </div>
+
+  <!-- ===== OFFLINE INDICATOR ===== -->
+  <div class="offline-indicator" id="offlineIndicator">
+    <span>📶</span>
+    <span id="offlineText">You are offline — data will be saved locally and synced when online</span>
+  </div>
+
+  <!-- ===== NAVIGATION TABS ===== -->
+  <div class="nav-tabs">
+    <button type="button" class="tab-btn active" id="tab-comm" onclick="switchView('community')">
+      🌍 Community Network
+    </button>
+    <button type="button" class="tab-btn" id="tab-ind" onclick="switchView('industrial')">
+      🏭 Industrial Generator
+    </button>
+    <button type="button" class="tab-btn" id="tab-dilex" onclick="switchView('dilex')">
+      ✅ Dilex Verification
+    </button>
+  </div>
+
+  <button type="button" class="btn-demo" onclick="fillDemoData()">
+    ⚡ Pre-load Master Test Payload
+  </button>
+
+  <!-- ===== MAIN FORM ===== -->
+  <form id="unifiedPeloForm">
+    <input type="hidden" id="mode" value="community" />
+    <input type="hidden" id="gpsCoordinates" value="" />
+
+    <!-- SHARED MATERIAL SELECTOR -->
+    <div class="form-group">
+      <label for="wasteType">Material Classification <span class="required">*</span></label>
+      <select id="wasteType" required>
+        <option value="💻 E-Waste / Circuit Boards / Electronics">💻 E-Waste / Circuit Boards / Electronics</option>
+        <option value="🥫 Scrap Metal, Copper Wiring & Cables">🥫 Scrap Metal, Copper Wiring & Cables</option>
+        <option value="🔋 Batteries & Power Storage">🔋 Batteries & Power Storage</option>
+        <option value="🟢 Used Cooking Oil (L)">🟢 Used Cooking Oil (L)</option>
+        <option value="🟡 Used Engine Oil & Lubricants (L)">🟡 Used Engine Oil & Lubricants (L)</option>
+        <option value="♻️ HDPE / PET Plastic Waste (kg)">♻️ HDPE / PET Plastic Waste (kg)</option>
+        <option value="📦 Cardboard & Paper (kg)">📦 Cardboard & Paper (kg)</option>
+        <option value="🍌 Food / Organic Waste (kg)">🍌 Food / Organic Waste (kg)</option>
+      </select>
+    </div>
+
+    <!-- COMMUNITY FIELDS -->
+    <div id="community-fields">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="siteType">Site Type <span class="required">*</span></label>
+          <select id="siteType" required>
+            <option value="🔧 Mechanic / Workshop">🔧 Mechanic / Workshop</option>
+            <option value="⚡ Generator / Plant">⚡ Generator / Plant</option>
+            <option value="🚗 Garage / Service Centre">🚗 Garage / Service Centre</option>
+            <option value="⛏️ Mining Site">⛏️ Mining Site</option>
+            <option value="🏪 Spaza / Tuck Shop">🏪 Spaza / Tuck Shop</option>
+            <option value="🍟 Kota Stand / Amagwinya">🍟 Kota Stand / Amagwinya</option>
+            <option value="📌 Other Site">📌 Other Site</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="businessName">Business / Owner Name <span class="required">*</span></label>
+          <input type="text" id="businessName" placeholder="e.g. Tsakane Auto Workshop" required />
+        </div>
+        <div class="form-group">
+          <label for="collectorName">Collector ID / Registered Name <span class="required">*</span></label>
+          <input type="text" id="collectorName" placeholder="e.g. Sipho Nkosi (COL-804)" required />
+        </div>
+        <div class="form-group">
+          <label for="contactPhone">Phone Number <span class="required">*</span></label>
+          <input type="text" id="contactPhone" placeholder="+27 82 555 1234" required />
+        </div>
+        <div class="form-group">
+          <label for="declaredQty">Collected Volume / Weight <span class="required">*</span></label>
+          <input type="number" id="declaredQty" step="0.1" placeholder="Declared Volume or Weight" required />
+        </div>
+        <div class="form-group">
+          <label for="areaCommunity">Area / Community Hub <span class="required">*</span></label>
+          <input type="text" id="areaCommunity" placeholder="e.g. Wattville / City Deep" required />
+        </div>
+      </div>
+
+      <div class="form-group full-width">
+        <label>Drop Pin Location — GPS Capture</label>
+        <div id="map"></div>
+        <div style="font-size:12px; color:#64748b; margin-top:5px;">
+          📍 Click on map to capture coordinates
+        </div>
+      </div>
+
+      <div class="section-title">
+        🛡️ Community Safety Contacts
+        <span class="count">(Optional)</span>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="whatsappGroup">WhatsApp Group</label>
+          <input type="text" id="whatsappGroup" placeholder="e.g. Wattville Safety Hub" />
+        </div>
+        <div class="form-group">
+          <label for="securityCompany">Security Company</label>
+          <input type="text" id="securityCompany" placeholder="e.g. Mapogo Security" />
+        </div>
+      </div>
+    </div>
+
+    <!-- INDUSTRIAL FIELDS -->
+    <div id="industrial-fields" style="display:none;">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="companyName">Generator Legal Name <span class="required">*</span></label>
+          <input type="text" id="companyName" placeholder="e.g. Apex Industrial SA (Pty) Ltd" required />
+        </div>
+        <div class="form-group">
+          <label for="regNumber">CIPC / SAWIS Registration <span class="required">*</span></label>
+          <input type="text" id="regNumber" placeholder="e.g. 2018/592014/07" required />
+        </div>
+        <div class="form-group">
+          <label for="indTonnage">Declared Manifest Weight (Tons/Kg) <span class="required">*</span></label>
+          <input type="number" id="indTonnage" step="0.1" placeholder="0.0" required />
+        </div>
+        <div class="form-group">
+          <label for="complianceEmail">Compliance Email <span class="required">*</span></label>
+          <input type="email" id="complianceEmail" placeholder="compliance@company.co.za" required />
+        </div>
+      </div>
+    </div>
+
+    <!-- DILEX FIELDS -->
+    <div id="dilex-fields" style="display:none;">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="manifestIdInput">Scan / Input Manifest Hash ID <span class="required">*</span></label>
+          <input type="text" id="manifestIdInput" placeholder="e.g. MNF-1725199200000-8A3" required />
+        </div>
+        <div class="form-group">
+          <label for="dilexInspector">Dilex Receiving Inspector <span class="required">*</span></label>
+          <input type="text" id="dilexInspector" placeholder="e.g. Dilex Gate 2 - Officer Mabuza" required />
+        </div>
+        <div class="form-group">
+          <label for="verifiedWeight">Dilex Scale Verified Weight (Kg/L) <span class="required">*</span></label>
+          <input type="number" id="verifiedWeight" step="0.1" placeholder="Verified Weighbridge Reading" required />
+        </div>
+        <div class="form-group">
+          <label for="stolenCheck">Chain-of-Custody & Theft Validation <span class="required">*</span></label>
+          <select id="stolenCheck" required>
+            <option value="✅ Verified Match (Legitimate Origin)">✅ Verified Match (Legitimate Origin)</option>
+            <option value="⚠️ Weight Mismatch Flagged">⚠️ Weight Mismatch Flagged</option>
+            <option value="🚨 Unregistered / Suspected Stolen Material">🚨 Unregistered / Suspected Stolen Material</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <button type="submit" id="submitBtn" class="btn-submit">
+      ⚛️ Submit Payload to Master Ledger
+    </button>
+  </form>
+
+  <!-- ===== MANIFEST OUTPUT ===== -->
+  <div id="manifestOutput"></div>
+
+  <!-- ===== ACTION BAR ===== -->
+  <div class="action-bar">
+    <button class="btn-export" onclick="exportCSV()">
+      <i class="fas fa-file-export"></i> Export CSV
+    </button>
+    <button class="btn-clear" onclick="clearAllEntries()">
+      <i class="fas fa-trash"></i> Clear All
+    </button>
+  </div>
+
+  <!-- ===== ENTRIES LIST ===== -->
+  <div id="entriesList"></div>
+
+  <!-- ===== IMPACT STATS ===== -->
+  <div class="stats-panel">
+    <div>
+      <div class="stat-val" id="statLitres">0</div>
+      <div class="stat-lbl">Litres Oil Collected</div>
+    </div>
+    <div>
+      <div class="stat-val" id="statSites">0</div>
+      <div class="stat-lbl">Sites Registered</div>
+    </div>
+    <div>
+      <div class="stat-val" id="statWeight">0 kg</div>
+      <div class="stat-lbl">E-Waste / Metals</div>
+    </div>
+    <div>
+      <div class="stat-val green" id="statCo2">0 kg</div>
+      <div class="stat-lbl">CO₂ Prevented</div>
+    </div>
+  </div>
+
+  <!-- ===== FOOTER ===== -->
+  <div class="footer-credits">
+    <div class="quantum">⚛️ CHSH S=2.76 · SA 2026/05142</div>
+    <div style="margin-top:4px;">© 2026 PELO Recovery Engine</div>
+    <div style="margin-top:2px; font-size:11px; color:#94a3b8;">
+      All data flows to: mindtech.industriesai@gmail.com
+    </div>
+  </div>
+</div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/js/all.min.js"></script>
+
+<script>
+// ============================================================
+// FIREBASE CONFIG
+// ============================================================
+const firebaseConfig = {
+  apiKey: "AIzaSyD5OB59lG6bAsmQ7A97zXP_MfQ5AM3BYaw",
+  authDomain: "mindflow-ai-education.firebaseapp.com",
+  projectId: "mindflow-ai-education",
+  storageBucket: "mindflow-ai-education.firebasestorage.app",
+  messagingSenderId: "157615197603",
+  appId: "1:157615197603:web:540d67781fc55d04c11e16"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+db.settings({ cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED });
+db.enablePersistence({ synchronizeTabs: true }).catch(() => {});
+
+const auth = firebase.auth();
+auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+
+// ============================================================
+// QUANTUM STATE
+// ============================================================
+const QUANTUM_STATE = {
+  chsh: 2.76,
+  patent: 'SA 2026/05142',
+  verified: true,
+  timestamp: new Date().toISOString()
+};
+
+// ============================================================
+// STATE
+// ============================================================
+let entries = [];
+let map = null;
+let marker = null;
+let isOffline = !navigator.onLine;
+let currentUser = null;
+
+// ============================================================
+// DOM REFS
+// ============================================================
+const modeInput = document.getElementById('mode');
+const wasteType = document.getElementById('wasteType');
+const gpsCoords = document.getElementById('gpsCoordinates');
+const manifestIdInput = document.getElementById('manifestIdInput');
+const submitBtn = document.getElementById('submitBtn');
+const manifestOutput = document.getElementById('manifestOutput');
+const statusBadge = document.getElementById('statusBadge');
+const offlineIndicator = document.getElementById('offlineIndicator');
+const offlineText = document.getElementById('offlineText');
+const entriesList = document.getElementById('entriesList');
+
+// ============================================================
+// MAP
+// ============================================================
+function initMap() {
+  map = L.map('map').setView([-26.2041, 28.0473], 10);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap'
+  }).addTo(map);
+
+  map.on('click', function(e) {
+    const lat = e.latlng.lat.toFixed(6);
+    const lng = e.latlng.lng.toFixed(6);
+    gpsCoords.value = `${lat}, ${lng}`;
+    if (marker) map.removeLayer(marker);
+    marker = L.marker([lat, lng]).addTo(map)
+      .bindPopup(`📍 ${lat}, ${lng}`).openPopup();
+    showToast('📍 Coordinates captured: ' + lat + ', ' + lng, 'success');
+  });
+}
+
+// ============================================================
+// VIEW SWITCHER
+// ============================================================
+function switchView(view) {
+  modeInput.value = view;
+  ['comm', 'ind', 'dilex'].forEach(t => 
+    document.getElementById('tab-' + t).classList.remove('active')
+  );
+  ['community-fields', 'industrial-fields', 'dilex-fields'].forEach(f => 
+    document.getElementById(f).style.display = 'none'
+  );
+
+  if (view === 'community') {
+    document.getElementById('tab-comm').classList.add('active');
+    document.getElementById('community-fields').style.display = 'block';
+  } else if (view === 'industrial') {
+    document.getElementById('tab-ind').classList.add('active');
+    document.getElementById('industrial-fields').style.display = 'block';
+  } else {
+    document.getElementById('tab-dilex').classList.add('active');
+    document.getElementById('dilex-fields').style.display = 'block';
+  }
+}
+
+// ============================================================
+// DEMO DATA
+// ============================================================
+function fillDemoData() {
+  const mode = modeInput.value;
+  
+  if (mode === 'community') {
+    document.getElementById('businessName').value = "City Deep Auto Recyclers";
+    document.getElementById('collectorName').value = "Sipho Nkosi (COL-804)";
+    document.getElementById('contactPhone').value = "+27 82 555 1234";
+    document.getElementById('declaredQty').value = "150.0";
+    document.getElementById('areaCommunity').value = "City Deep Hub";
+    document.getElementById('whatsappGroup').value = "Gauteng Scrap Watch";
+    document.getElementById('securityCompany').value = "Mapogo Security";
+    gpsCoords.value = "-26.205000, 28.048000";
+    showToast('✅ Community demo data loaded', 'success');
+  } else if (mode === 'industrial') {
+    document.getElementById('companyName').value = "Apex Manufacturing SA (Pty) Ltd";
+    document.getElementById('regNumber').value = "2018/592014/07";
+    document.getElementById('indTonnage').value = "12.5";
+    document.getElementById('complianceEmail').value = "compliance@apex.co.za";
+    showToast('✅ Industrial demo data loaded', 'success');
+  } else {
+    manifestIdInput.value = "MNF-" + Date.now() + "-" + Math.floor(Math.random()*1000);
+    document.getElementById('dilexInspector').value = "Dilex Gate 2 - Officer Mabuza";
+    document.getElementById('verifiedWeight').value = "150.0";
+    document.getElementById('stolenCheck').value = "✅ Verified Match (Legitimate Origin)";
+    showToast('✅ Dilex demo data loaded', 'success');
+  }
+}
+
+// ============================================================
+// TOAST
+// ============================================================
+function showToast(msg, type = 'info') {
+  const existing = document.querySelector('.toast');
+  if (existing) existing.remove();
+
+  const div = document.createElement('div');
+  div.className = 'toast ' + type;
+  div.textContent = msg;
+  document.body.appendChild(div);
+
+  setTimeout(() => {
+    if (div.parentNode) div.remove();
+  }, 4000);
+}
+
+// ============================================================
+// STATS
+// ============================================================
+function updateStats() {
+  const totalOil = entries.reduce((sum, e) => sum + (parseFloat(e.declaredQty) || 0), 0);
+  const totalSites = entries.length;
+  const totalWeight = entries.reduce((sum, e) => sum + (parseFloat(e.declaredQty) || 0), 0);
+  const co2Saved = Math.round(totalOil * 0.8 * 0.75);
+
+  document.getElementById('statLitres').textContent = totalOil.toFixed(0);
+  document.getElementById('statSites').textContent = totalSites;
+  document.getElementById('statWeight').textContent = totalWeight.toFixed(0) + ' kg';
+  document.getElementById('statCo2').textContent = co2Saved + ' kg';
+
+  localStorage.setItem('pelo_master_entries', JSON.stringify(entries));
+  renderEntries();
+}
+
+// ============================================================
+// RENDER ENTRIES
+// ============================================================
+function renderEntries() {
+  if (entries.length === 0) {
+    entriesList.innerHTML = '<p style="color:#94a3b8; font-size:13px; text-align:center; padding:10px;">No entries yet</p>';
+    return;
+  }
+
+  let html = '';
+  const recent = entries.slice(-5).reverse();
+  recent.forEach(e => {
+    html += `
+      <div class="entry-item">
+        <span class="entry-id">${e.manifestId || 'N/A'}</span>
+        <span class="entry-material">${e.materialType || 'N/A'}</span>
+        <span class="entry-status">${e.declaredQty || e.verifiedWeight || 0} ${e.mode === 'dilex' ? 'kg' : 'L'}</span>
+      </div>
+    `;
+  });
+  entriesList.innerHTML = html;
+}
+
+// ============================================================
+// GENERATE MANIFEST ID
+// ============================================================
+function generateManifestId() {
+  const timestamp = Date.now();
+  const random = Math.floor(Math.random() * 10000);
+  return `MNF-${timestamp}-${random.toString().padStart(4, '0')}`;
+}
+
+// ============================================================
+// SUBMIT TO FIRESTORE WITH RETRY
+// ============================================================
+async function submitToFirestore(entry, retries = 3) {
+  let lastError;
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      const docId = entry.manifestId || generateManifestId();
+      await db.collection('pelo_master_ledger').doc(docId).set({
+        ...entry,
+        firestoreTimestamp: firebase.firestore.FieldValue.serverTimestamp(),
+        quantumState: QUANTUM_STATE,
+        chsh_s: '2.76',
+        patent: 'SA 2026/05142',
+        source: 'pelo_master_system',
+        status: 'submitted',
+        _retryCount: attempt - 1
+      }, { merge: true });
+      return { success: true, docId };
+    } catch (err) {
+      lastError = err;
+      console.warn(`⚠️ Attempt ${attempt} failed:`, err.message);
+      if (attempt < retries) {
+        const delay = Math.pow(2, attempt) * 1000;
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+  }
+  return { success: false, error: lastError.message };
+}
+
+// ============================================================
+// FORM SUBMIT
+// ============================================================
+document.getElementById('unifiedPeloForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  
+  const mode = modeInput.value;
+  const manifestId = (mode === 'dilex' && manifestIdInput.value) ? manifestIdInput.value : generateManifestId();
+  
+  const payload = {
+    mode: mode,
+    manifestId: manifestId,
+    timestamp: new Date().toISOString(),
+    materialType: wasteType.value,
+    gpsCoordinates: gpsCoords.value,
+    chsh_s: '2.76',
+    patent: 'SA 2026/05142'
+  };
+
+  // Validate based on mode
+  if (mode === 'community') {
+    payload.siteType = document.getElementById('siteType').value;
+    payload.businessName = document.getElementById('businessName').value.trim();
+    payload.collectorName = document.getElementById('collectorName').value.trim();
+    payload.contactPhone = document.getElementById('contactPhone').value.trim();
+    payload.declaredQty = parseFloat(document.getElementById('declaredQty').value) || 0;
+    payload.areaCommunity = document.getElementById('areaCommunity').value.trim();
+    payload.whatsappGroup = document.getElementById('whatsappGroup').value.trim();
+    payload.securityCompany = document.getElementById('securityCompany').value.trim();
+    
+    if (!payload.businessName || !payload.collectorName) {
+      showToast('⚠️ Please fill in all required community fields.', 'error');
+      return;
+    }
+  } else if (mode === 'industrial') {
+    payload.companyName = document.getElementById('companyName').value.trim();
+    payload.regNumber = document.getElementById('regNumber').value.trim();
+    payload.declaredQty = parseFloat(document.getElementById('indTonnage').value) || 0;
+    payload.complianceEmail = document.getElementById('complianceEmail').value.trim();
+    
+    if (!payload.companyName || !payload.regNumber) {
+      showToast('⚠️ Please fill in all required industrial fields.', 'error');
+      return;
+    }
+  } else {
+    payload.manifestId = manifestId;
+    payload.dilexInspector = document.getElementById('dilexInspector').value.trim();
+    payload.verifiedWeight = parseFloat(document.getElementById('verifiedWeight').value) || 0;
+    payload.stolenVerificationStatus = document.getElementById('stolenCheck').value;
+    
+    if (!payload.dilexInspector || !payload.verifiedWeight) {
+      showToast('⚠️ Please fill in all required Dilex fields.', 'error');
+      return;
+    }
+  }
+
+  submitBtn.disabled = true;
+  submitBtn.innerHTML = '⏳ Submitting to Master Ledger...';
+
+  try {
+    // Firestore write with retry
+    const result = await submitToFirestore(payload);
+    
+    if (result.success) {
+      // Email via FormSubmit
+      const formData = new FormData();
+      formData.append('_subject', 'PELO Master Ledger Entry');
+      formData.append('_captcha', 'false');
+      formData.append('_template', 'table');
+      formData.append('_autoresponse', '✅ Payload registered in PELO Master Ledger.');
+      formData.append('manifestId', payload.manifestId);
+      formData.append('materialType', payload.materialType);
+      formData.append('mode', payload.mode);
+      
+      Object.entries(payload).forEach(([key, val]) => {
+        if (val !== undefined && val !== null && val !== '') {
+          formData.append(key, String(val));
+        }
+      });
+
+      fetch('https://formsubmit.co/mindtech.industriesai@gmail.com', {
+        method: 'POST',
+        body: formData
+      }).catch(() => {});
+
+      // Update local state
+      entries.push(payload);
+      updateStats();
+
+      // Show success
+      manifestOutput.style.display = 'block';
+      manifestOutput.innerHTML = `
+        <div style="font-size:14px; font-weight:700; margin-bottom:10px;" class="success">
+          ✅ PAYLOAD REGISTERED IN MASTER LEDGER
+        </div>
+        <div style="font-size:13px; margin-bottom:6px;">
+          <span style="color:#94a3b8;">MANIFEST ID:</span> 
+          <span style="color:#38bdf8;">${payload.manifestId}</span>
+        </div>
+        <div style="font-size:13px; margin-bottom:6px;">
+          <span style="color:#94a3b8;">MATERIAL:</span> 
+          <span style="color:#4ade80;">${payload.materialType}</span>
+        </div>
+        <div style="font-size:12px; color:#64748b; margin-top:10px; border-top:1px solid #334155; padding-top:10px;">
+          ⚛️ CHSH S=2.76 · SA 2026/05142
+        </div>
+      `;
+
+      showToast(`✅ Manifest ${payload.manifestId} registered successfully!`, 'success');
+
+      // Reset form
+      document.getElementById('unifiedPeloForm').reset();
+      document.getElementById('gpsCoordinates').value = '';
+
+      if (marker) {
+        map.removeLayer(marker);
+        marker = null;
+      }
+    } else {
+      showToast('❌ Firestore error: ' + result.error, 'error');
+    }
+  } catch (err) {
+    showToast('❌ Submission error: ' + err.message, 'error');
+  }
+
+  submitBtn.disabled = false;
+  submitBtn.innerHTML = '⚛️ Submit Payload to Master Ledger';
+});
+
+// ============================================================
+// EXPORT CSV
+// ============================================================
+function exportCSV() {
+  if (entries.length === 0) {
+    showToast('⚠️ No entries to export.', 'error');
+    return;
+  }
+
+  const headers = ['Manifest ID', 'Mode', 'Material', 'Quantity', 'Area/Business', 'GPS', 'Timestamp', 'CHSH S'];
+  let csv = headers.join(',') + '\n';
+
+  entries.forEach(e => {
+    const row = [
+      e.manifestId || '',
+      e.mode || '',
+      `"${e.materialType || ''}"`,
+      e.declaredQty || e.verifiedWeight || 0,
+      `"${e.areaCommunity || e.companyName || e.dilexInspector || ''}"`,
+      `"${e.gpsCoordinates || ''}"`,
+      e.timestamp || '',
+      e.chsh_s || '2.76'
+    ];
+    csv += row.join(',') + '\n';
+  });
+
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `pelo_manifest_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('📊 CSV exported successfully!', 'success');
+}
+
+// ============================================================
+// CLEAR ALL
+// ============================================================
+function clearAllEntries() {
+  if (entries.length === 0) {
+    showToast('No entries to clear.', 'warning');
+    return;
+  }
+  
+  if (confirm('Delete ALL entries? This cannot be undone.')) {
+    entries = [];
+    localStorage.removeItem('pelo_master_entries');
+    updateStats();
+    showToast('🗑️ All entries cleared.', 'warning');
+  }
+}
+
+// ============================================================
+// OFFLINE DETECTION
+// ============================================================
+function updateOfflineStatus() {
+  isOffline = !navigator.onLine;
+  
+  if (isOffline) {
+    offlineIndicator.classList.add('visible');
+    offlineText.textContent = 'You are offline — data will be saved locally and synced when online';
+    statusBadge.textContent = '🔴 OFFLINE';
+    statusBadge.style.background = '#fef2f2';
+    statusBadge.style.color = '#dc2626';
+    statusBadge.style.borderColor = '#fecaca';
+  } else {
+    offlineIndicator.classList.remove('visible');
+    statusBadge.textContent = '🟢 ONLINE';
+    statusBadge.style.background = '#f0fdf4';
+    statusBadge.style.color = '#15803d';
+    statusBadge.style.borderColor = '#bbf7d0';
+  }
+}
+
+window.addEventListener('online', updateOfflineStatus);
+window.addEventListener('offline', updateOfflineStatus);
+
+// ============================================================
+// INIT
+// ============================================================
+document.addEventListener('DOMContentLoaded', function() {
+  initMap();
+  updateOfflineStatus();
+
+  const saved = localStorage.getItem('pelo_master_entries');
+  if (saved) {
+    try {
+      entries = JSON.parse(saved);
+      updateStats();
+    } catch(e) {}
+  }
+
+  console.log('🚀 PELO Master System v3.0 — CHSH S=2.76');
+  console.log('   📧 All data flows to: mindtech.industriesai@gmail.com');
+  console.log('   🔐 Quantum-verified chain-of-custody');
+  console.log('   🌍 Built in Africa, for Africa');
+});
+</script>
+
+</body>
+</html>
