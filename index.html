@@ -4,57 +4,32 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MindTech Waste Management Engine</title>
-  
-  <!-- Inline favicon (no 404) -->
+
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚛️</text></svg>">
-  
-  <!-- Leaflet CSS -->
+
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  
-  <!-- Exo 2 Font & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-
-  <!-- Particles.js for Quantum Background -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/particles.js/2.0.0/particles.min.js"></script>
-
-  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
   <style>
     :root {
-      --bg-dark: #090d16;
-      --card-bg: rgba(15, 23, 42, 0.75);
-      --card-border: rgba(255, 255, 255, 0.08);
-      --input-bg: rgba(30, 41, 59, 0.6);
-      --input-border: rgba(255, 255, 255, 0.12);
-      --accent-cyan: #38bdf8;
-      --accent-blue: #0284c7;
-      --accent-green: #10b981;
-      --accent-amber: #f59e0b;
-      --accent-rose: #f43f5e;
-      --accent-purple: #8B5CF6;
-      --text-primary: #f8fafc;
-      --text-secondary: #94a3b8;
-      --text-muted: #64748b;
-      --radius-lg: 20px;
-      --radius-md: 12px;
-      --radius-sm: 8px;
-      --shadow-glow: 0 20px 50px rgba(2, 132, 199, 0.15);
+      --bg-dark: #090d16; --card-bg: rgba(15, 23, 42, 0.75); --card-border: rgba(255, 255, 255, 0.08);
+      --input-bg: rgba(30, 41, 59, 0.6); --input-border: rgba(255, 255, 255, 0.12);
+      --accent-cyan: #38bdf8; --accent-blue: #0284c7; --accent-green: #10b981;
+      --accent-amber: #f59e0b; --accent-rose: #f43f5e; --accent-purple: #8B5CF6;
+      --text-primary: #f8fafc; --text-secondary: #94a3b8; --text-muted: #64748b;
+      --radius-lg: 20px; --radius-md: 12px; --radius-sm: 8px; --shadow-glow: 0 20px 50px rgba(2, 132, 199, 0.15);
     }
-
     * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body { font-family: 'Exo 2', -apple-system, BlinkMacSystemFont, sans-serif; background-color: var(--bg-dark); margin: 0; padding: 30px 15px; color: var(--text-primary); min-height: 100vh; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
-
+    body { font-family: 'Exo 2', sans-serif; background-color: var(--bg-dark); margin: 0; padding: 30px 15px; color: var(--text-primary); min-height: 100vh; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
     #particles-js { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
-
     .container { max-width: 960px; margin: 0 auto; background: var(--card-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); padding: 40px; border-radius: var(--radius-lg); box-shadow: var(--shadow-glow); border: 1px solid var(--card-border); position: relative; z-index: 1; }
-
     .brand-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid var(--card-border); flex-wrap: wrap; gap: 15px; }
     .brand-logo-area { display: flex; align-items: center; gap: 15px; }
     .brand-logo { height: 48px; width: auto; filter: drop-shadow(0 0 20px rgba(2, 132, 199, 0.2)); transition: all 0.3s ease; }
@@ -66,12 +41,10 @@
     .badge-pelo { background: rgba(2, 132, 199, 0.15); color: var(--accent-cyan); border: 1px solid rgba(56, 189, 248, 0.3); font-family: 'Exo 2', sans-serif; }
     .badge-quantum { background: rgba(139, 92, 246, 0.15); color: var(--accent-purple); border: 1px solid rgba(139, 92, 246, 0.3); font-family: 'JetBrains Mono', monospace; }
     .badge-live { background: rgba(244, 63, 94, 0.15); color: var(--accent-rose); border: 1px solid rgba(244, 63, 94, 0.3); font-family: 'Exo 2', sans-serif; }
-
     .nav-tabs { display: flex; gap: 8px; margin-bottom: 25px; background: rgba(15, 23, 42, 0.6); padding: 6px; border-radius: var(--radius-md); border: 1px solid var(--card-border); flex-wrap: wrap; }
     .tab-btn { flex: 1; padding: 12px 16px; border: none; background: transparent; font-weight: 700; cursor: pointer; border-radius: var(--radius-sm); color: var(--text-secondary); transition: all 0.25s ease; font-size: 13px; min-width: 140px; display: flex; align-items: center; justify-content: center; gap: 8px; font-family: 'Exo 2', sans-serif; }
     .tab-btn.active { background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple)); color: #ffffff; box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3); }
     .tab-btn:hover:not(.active) { background: rgba(255, 255, 255, 0.05); color: var(--text-primary); }
-
     .section-title { font-size: 15px; font-weight: 700; color: var(--text-primary); margin-top: 30px; margin-bottom: 18px; padding-bottom: 8px; border-bottom: 1px solid var(--card-border); display: flex; align-items: center; gap: 10px; text-transform: uppercase; letter-spacing: 0.5px; font-family: 'Exo 2', sans-serif; }
     .section-title .count { font-size: 12px; font-weight: 500; color: var(--text-muted); text-transform: none; margin-left: auto; }
     .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
@@ -85,48 +58,39 @@
     select option { background: #0f172a; color: #ffffff; }
     input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent-cyan); box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2); background: rgba(30, 41, 59, 0.9); }
     #map { height: 260px; width: 100%; border-radius: var(--radius-sm); border: 1px solid var(--input-border); margin-top: 8px; overflow: hidden; }
-
     .btn-submit { width: 100%; padding: 16px; background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple)); color: #ffffff; border: none; border-radius: var(--radius-sm); font-weight: 700; font-size: 15px; cursor: pointer; margin-top: 20px; transition: all 0.2s ease; box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3); display: flex; align-items: center; justify-content: center; gap: 10px; font-family: 'Exo 2', sans-serif; }
     .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4); }
     .btn-demo { background: rgba(255, 255, 255, 0.05); color: var(--accent-cyan); border: 1px dashed rgba(56, 189, 248, 0.4); padding: 12px; border-radius: var(--radius-sm); cursor: pointer; font-size: 13px; font-weight: 600; margin-bottom: 25px; width: 100%; transition: all 0.2s ease; font-family: 'Exo 2', sans-serif; }
     .btn-demo:hover { background: rgba(56, 189, 248, 0.1); }
-
     .action-bar { display: flex; gap: 12px; margin-top: 30px; margin-bottom: 15px; }
     .btn-export, .btn-clear { flex: 1; padding: 10px 16px; border-radius: var(--radius-sm); cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 8px; border: none; font-family: 'Exo 2', sans-serif; }
     .btn-export { background: rgba(16, 185, 129, 0.15); color: var(--accent-green); border: 1px solid rgba(16, 185, 129, 0.3); }
     .btn-export:hover { background: rgba(16, 185, 129, 0.25); }
     .btn-clear { background: rgba(244, 63, 94, 0.15); color: var(--accent-rose); border: 1px solid rgba(244, 63, 94, 0.3); }
     .btn-clear:hover { background: rgba(244, 63, 94, 0.25); }
-
     .stats-panel { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; background: rgba(15, 23, 42, 0.8); padding: 20px; border-radius: var(--radius-md); border: 1px solid var(--card-border); margin-top: 30px; text-align: center; }
     @media (max-width: 600px) { .stats-panel { grid-template-columns: repeat(2, 1fr); } }
     .stat-val { font-size: 22px; font-weight: 800; color: var(--accent-cyan); font-family: 'JetBrains Mono', monospace; }
     .stat-val.green { color: var(--accent-green); }
     .stat-lbl { font-size: 11px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; margin-top: 4px; font-family: 'Exo 2', sans-serif; }
-
     #manifestOutput { display: none; font-family: 'JetBrains Mono', monospace; background: #020617; color: var(--accent-cyan); padding: 20px; border-radius: var(--radius-md); margin-top: 25px; border: 1px solid rgba(56, 189, 248, 0.2); box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.5); }
     #entriesList { max-height: 220px; overflow-y: auto; margin-top: 10px; display: flex; flex-direction: column; gap: 8px; }
     .entry-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: rgba(30, 41, 59, 0.4); border-radius: var(--radius-sm); font-size: 13px; border: 1px solid var(--card-border); border-left: 3px solid var(--accent-purple); }
     .entry-item .entry-id { font-weight: 700; color: var(--text-primary); font-family: 'JetBrains Mono', monospace; }
     .entry-item .entry-material { color: var(--text-secondary); }
     .entry-item .entry-status { color: var(--accent-green); font-weight: 700; }
-
     .offline-indicator { display: none; background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.3); color: var(--accent-amber); padding: 12px 18px; border-radius: var(--radius-sm); margin-bottom: 20px; font-size: 13px; font-weight: 600; align-items: center; gap: 10px; font-family: 'Exo 2', sans-serif; }
     .offline-indicator.visible { display: flex; }
-
     .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #0f172a; color: var(--text-primary); padding: 14px 28px; border-radius: 30px; border: 1px solid var(--card-border); box-shadow: 0 10px 40px rgba(0,0,0,0.5); font-weight: 600; font-size: 13px; z-index: 99999; animation: slideUp 0.3s ease; font-family: 'Exo 2', sans-serif; }
     .toast.success { border-color: var(--accent-green); color: var(--accent-green); }
     .toast.error { border-color: var(--accent-rose); color: var(--accent-rose); }
     @keyframes slideUp { from { opacity: 0; transform: translateX(-50%) translateY(20px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
-
     .footer-credits { text-align: center; margin-top: 40px; font-size: 12px; color: var(--text-muted); border-top: 1px solid var(--card-border); padding-top: 25px; font-family: 'Exo 2', sans-serif; }
     .footer-credits .quantum { font-family: 'JetBrains Mono', monospace; color: var(--accent-purple); letter-spacing: 0.5px; }
     .footer-logos { display: flex; justify-content: center; align-items: center; gap: 30px; margin-bottom: 15px; flex-wrap: wrap; }
     .footer-logo { height: 36px; width: auto; opacity: 0.6; transition: all 0.3s ease; filter: drop-shadow(0 0 10px rgba(2, 132, 199, 0.05)); }
     .footer-logo:hover { opacity: 1; filter: drop-shadow(0 0 20px rgba(139, 92, 246, 0.15)); transform: scale(1.02); }
-
     @media (max-width: 680px) { .brand-header { flex-direction: column; align-items: flex-start; } .brand-logo-area { width: 100%; } .header-badges { width: 100%; justify-content: flex-start; } .brand-text h1 { font-size: 18px; } .brand-logo { height: 40px; } }
-    
     .handshake-badge { padding: 6px 14px; border-radius: 30px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display: inline-flex; align-items: center; gap: 6px; font-family: 'JetBrains Mono', monospace; border: 1px solid var(--accent-amber); color: var(--accent-amber); background: rgba(245, 158, 11, 0.08); transition: all 0.3s; }
     .handshake-badge.confirmed { border-color: var(--accent-green); color: var(--accent-green); background: rgba(16, 185, 129, 0.08); }
     .handshake-badge.unreachable { border-color: var(--accent-rose); color: var(--accent-rose); background: rgba(244, 63, 94, 0.08); }
@@ -349,20 +313,14 @@
   </div>
 </div>
 
-<!-- Leaflet JS -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-<!-- ============================================================ -->
-<!-- DEFENSIVE HANDSHAKE — DIRECT FETCH -->
-<!-- ============================================================ -->
+<!-- DEFENSIVE HANDSHAKE -->
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     console.log('[Handshake] Script loaded, waiting for DOM...');
     const badge = document.getElementById('handshakeBadge');
-    if (!badge) {
-      console.error('[Handshake] ❌ #handshakeBadge not found');
-      return;
-    }
+    if (!badge) { console.error('[Handshake] ❌ #handshakeBadge not found'); return; }
     console.log('[Handshake] Badge found, starting fetch...');
     badge.className = 'handshake-badge';
     badge.innerHTML = '<i class="fas fa-satellite-dish"></i> Handshake: Pending...';
@@ -370,13 +328,8 @@
     (async function runHandshake() {
       try {
         try {
-          await fetch('https://pelo-complete.onrender.com/health', {
-            method: 'GET',
-            signal: AbortSignal.timeout(5000)
-          });
-        } catch (e) {
-          console.log('[Handshake] Warm-up sent (cold start)');
-        }
+          await fetch('https://pelo-complete.onrender.com/health', { method: 'GET', signal: AbortSignal.timeout(5000) });
+        } catch (e) { console.log('[Handshake] Warm-up sent (cold start)'); }
 
         const res = await fetch('https://pelo-complete.onrender.com/api/v1/verify/chsh', {
           method: 'GET',
@@ -403,9 +356,7 @@
   });
 </script>
 
-<!-- ============================================================ -->
 <!-- MAIN APP LOGIC -->
-<!-- ============================================================ -->
 <script>
 particlesJS('particles-js', {
   particles: {
@@ -417,9 +368,7 @@ particlesJS('particles-js', {
     line_linked: { enable: true, distance: 150, color: '#8B5CF6', opacity: 0.08, width: 0.6 },
     move: { enable: true, speed: 0.6, direction: 'none', random: true, out_mode: 'out' }
   },
-  interactivity: {
-    events: { onhover: { enable: true, mode: 'repulse' }, onclick: { enable: true, mode: 'push' } }
-  },
+  interactivity: { events: { onhover: { enable: true, mode: 'repulse' }, onclick: { enable: true, mode: 'push' } } },
   retina_detect: true
 });
 
@@ -439,12 +388,7 @@ db.enablePersistence({ synchronizeTabs: true }).catch(() => {});
 const auth = firebase.auth();
 auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
 
-const QUANTUM_STATE = {
-  chsh: 2.76,
-  patent: 'SA 2026/05142',
-  verified: true,
-  timestamp: new Date().toISOString()
-};
+const QUANTUM_STATE = { chsh: 2.76, patent: 'SA 2026/05142', verified: true, timestamp: new Date().toISOString() };
 
 let entries = [];
 let map = null;
@@ -464,8 +408,9 @@ const entriesList = document.getElementById('entriesList');
 
 function initMap() {
   map = L.map('map').setView([-26.2041, 28.0473], 10);
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-    attribution: '© OpenStreetMap © CARTO'
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors',
+    maxZoom: 19
   }).addTo(map);
 
   map.on('click', function(e) {
@@ -473,20 +418,15 @@ function initMap() {
     const lng = e.latlng.lng.toFixed(6);
     gpsCoords.value = `${lat}, ${lng}`;
     if (marker) map.removeLayer(marker);
-    marker = L.marker([lat, lng]).addTo(map)
-      .bindPopup(`📍 ${lat}, ${lng}`).openPopup();
+    marker = L.marker([lat, lng]).addTo(map).bindPopup(`📍 ${lat}, ${lng}`).openPopup();
     showToast('📍 Coordinates captured: ' + lat + ', ' + lng, 'success');
   });
 }
 
 function switchView(view) {
   modeInput.value = view;
-  ['comm', 'ind', 'mindtech'].forEach(t => 
-    document.getElementById('tab-' + t).classList.remove('active')
-  );
-  ['community-fields', 'industrial-fields', 'mindtech-fields'].forEach(f => 
-    document.getElementById(f).style.display = 'none'
-  );
+  ['comm', 'ind', 'mindtech'].forEach(t => document.getElementById('tab-' + t).classList.remove('active'));
+  ['community-fields', 'industrial-fields', 'mindtech-fields'].forEach(f => document.getElementById(f).style.display = 'none');
 
   if (view === 'community') {
     document.getElementById('tab-comm').classList.add('active');
@@ -530,15 +470,11 @@ function fillDemoData() {
 function showToast(msg, type = 'info') {
   const existing = document.querySelector('.toast');
   if (existing) existing.remove();
-
   const div = document.createElement('div');
   div.className = 'toast ' + type;
   div.textContent = msg;
   document.body.appendChild(div);
-
-  setTimeout(() => {
-    if (div.parentNode) div.remove();
-  }, 4000);
+  setTimeout(() => { if (div.parentNode) div.remove(); }, 4000);
 }
 
 function updateStats() {
@@ -561,7 +497,6 @@ function renderEntries() {
     entriesList.innerHTML = '<p style="color:var(--text-muted); font-size:13px; text-align:center; padding:10px;">No ledger entries yet</p>';
     return;
   }
-
   let html = '';
   const recent = entries.slice(-5).reverse();
   recent.forEach(e => {
@@ -610,18 +545,12 @@ async function submitToFirestore(entry, retries = 3) {
 
 document.getElementById('unifiedPeloForm').addEventListener('submit', async function(e) {
   e.preventDefault();
-  
   const mode = modeInput.value;
   const manifestId = (mode === 'mindtech' && manifestIdInput.value) ? manifestIdInput.value : generateManifestId();
-  
   const payload = {
-    mode: mode,
-    manifestId: manifestId,
-    timestamp: new Date().toISOString(),
-    materialType: wasteType.value,
-    gpsCoordinates: gpsCoords.value,
-    chsh_s: '2.76',
-    patent: 'SA 2026/05142'
+    mode: mode, manifestId: manifestId, timestamp: new Date().toISOString(),
+    materialType: wasteType.value, gpsCoordinates: gpsCoords.value,
+    chsh_s: '2.76', patent: 'SA 2026/05142'
   };
 
   if (mode === 'community') {
@@ -649,77 +578,47 @@ document.getElementById('unifiedPeloForm').addEventListener('submit', async func
 
   try {
     const result = await submitToFirestore(payload);
-    
     if (result.success) {
       entries.push(payload);
       updateStats();
-
       manifestOutput.style.display = 'block';
       manifestOutput.innerHTML = `
-        <div style="font-size:14px; font-weight:700; margin-bottom:10px; color:var(--accent-green);">
-          ✅ PAYLOAD REGISTERED IN MASTER LEDGER
-        </div>
-        <div style="font-size:13px; margin-bottom:6px;">
-          <span style="color:var(--text-muted);">MANIFEST ID:</span> 
-          <span style="color:var(--accent-cyan);">${payload.manifestId}</span>
-        </div>
-        <div style="font-size:13px; margin-bottom:6px;">
-          <span style="color:var(--text-muted);">MATERIAL:</span> 
-          <span style="color:var(--text-primary);">${payload.materialType}</span>
-        </div>
-        <div style="font-size:12px; color:var(--text-muted); margin-top:10px; border-top:1px solid var(--card-border); padding-top:10px;">
-          ⚛️ CHSH S=2.76 · SA 2026/05142
-        </div>
+        <div style="font-size:14px; font-weight:700; margin-bottom:10px; color:var(--accent-green);">✅ PAYLOAD REGISTERED IN MASTER LEDGER</div>
+        <div style="font-size:13px; margin-bottom:6px;"><span style="color:var(--text-muted);">MANIFEST ID:</span> <span style="color:var(--accent-cyan);">${payload.manifestId}</span></div>
+        <div style="font-size:13px; margin-bottom:6px;"><span style="color:var(--text-muted);">MATERIAL:</span> <span style="color:var(--text-primary);">${payload.materialType}</span></div>
+        <div style="font-size:12px; color:var(--text-muted); margin-top:10px; border-top:1px solid var(--card-border); padding-top:10px;">⚛️ CHSH S=2.76 · SA 2026/05142</div>
       `;
-
       showToast(`✅ Manifest ${payload.manifestId} registered!`, 'success');
       document.getElementById('unifiedPeloForm').reset();
       document.getElementById('gpsCoordinates').value = '';
-
-      if (marker) {
-        map.removeLayer(marker);
-        marker = null;
-      }
+      if (marker) { map.removeLayer(marker); marker = null; }
     } else {
       showToast('❌ Firestore error: ' + result.error, 'error');
     }
   } catch (err) {
     showToast('❌ Submission error: ' + err.message, 'error');
   }
-
   submitBtn.disabled = false;
   submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Submit Payload to Master Ledger';
 });
 
 function exportCSV() {
-  if (entries.length === 0) {
-    showToast('⚠️ No entries to export.', 'error');
-    return;
-  }
-
+  if (entries.length === 0) { showToast('⚠️ No entries to export.', 'error'); return; }
   const headers = ['Manifest ID', 'Mode', 'Material', 'Quantity', 'Area/Business', 'GPS', 'Timestamp', 'CHSH S'];
   let csv = headers.join(',') + '\n';
-
   entries.forEach(e => {
     const row = [
-      e.manifestId || '',
-      e.mode || '',
-      `"${e.materialType || ''}"`,
+      e.manifestId || '', e.mode || '', `"${e.materialType || ''}"`,
       e.declaredQty || e.verifiedWeight || 0,
       `"${e.areaCommunity || e.companyName || e.mindtechInspector || ''}"`,
-      `"${e.gpsCoordinates || ''}"`,
-      e.timestamp || '',
-      e.chsh_s || '2.76'
+      `"${e.gpsCoordinates || ''}"`, e.timestamp || '', e.chsh_s || '2.76'
     ];
     csv += row.join(',') + '\n';
   });
-
   const blob = new Blob([csv], { type: 'text/csv' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = url;
-  a.download = `pelo_manifest_${new Date().toISOString().slice(0,10)}.csv`;
-  a.click();
+  a.href = url; a.download = `pelo_manifest_${new Date().toISOString().slice(0,10)}.csv`; a.click();
   URL.revokeObjectURL(url);
   showToast('📊 CSV exported successfully!', 'success');
 }
@@ -755,15 +654,10 @@ window.addEventListener('offline', updateOfflineStatus);
 document.addEventListener('DOMContentLoaded', function() {
   initMap();
   updateOfflineStatus();
-
   const saved = localStorage.getItem('pelo_master_entries');
   if (saved) {
-    try {
-      entries = JSON.parse(saved);
-      updateStats();
-    } catch(e) {}
+    try { entries = JSON.parse(saved); updateStats(); } catch(e) {}
   }
-
   console.log('🚀 MindTech Waste Management Engine v2.0');
   console.log('   ⚛️ QUANTUM BACKEND: CHSH S=2.76 · SA 2026/05142');
   console.log('   📧 ALL data flows to: mindtech.industriesai@gmail.com');
