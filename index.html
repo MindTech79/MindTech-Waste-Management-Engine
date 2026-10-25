@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MindTech Waste Management Engine</title>
   
+  <!-- Inline favicon (no 404) -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚛️</text></svg>">
+  
   <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   
@@ -29,18 +32,15 @@
       --card-border: rgba(255, 255, 255, 0.08);
       --input-bg: rgba(30, 41, 59, 0.6);
       --input-border: rgba(255, 255, 255, 0.12);
-      
       --accent-cyan: #38bdf8;
       --accent-blue: #0284c7;
       --accent-green: #10b981;
       --accent-amber: #f59e0b;
       --accent-rose: #f43f5e;
       --accent-purple: #8B5CF6;
-      
       --text-primary: #f8fafc;
       --text-secondary: #94a3b8;
       --text-muted: #64748b;
-      
       --radius-lg: 20px;
       --radius-md: 12px;
       --radius-sm: 8px;
@@ -49,544 +49,95 @@
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
-    body {
-      font-family: 'Exo 2', -apple-system, BlinkMacSystemFont, sans-serif;
-      background-color: var(--bg-dark);
-      margin: 0;
-      padding: 30px 15px;
-      color: var(--text-primary);
-      min-height: 100vh;
-      -webkit-font-smoothing: antialiased;
-      overflow-x: hidden;
-    }
+    body { font-family: 'Exo 2', -apple-system, BlinkMacSystemFont, sans-serif; background-color: var(--bg-dark); margin: 0; padding: 30px 15px; color: var(--text-primary); min-height: 100vh; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
 
-    /* ===== PARTICLES BACKGROUND ===== */
-    #particles-js {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 0;
-      pointer-events: none;
-    }
+    #particles-js { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
 
-    .container {
-      max-width: 960px;
-      margin: 0 auto;
-      background: var(--card-bg);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      padding: 40px;
-      border-radius: var(--radius-lg);
-      box-shadow: var(--shadow-glow);
-      border: 1px solid var(--card-border);
-      position: relative;
-      z-index: 1;
-    }
+    .container { max-width: 960px; margin: 0 auto; background: var(--card-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); padding: 40px; border-radius: var(--radius-lg); box-shadow: var(--shadow-glow); border: 1px solid var(--card-border); position: relative; z-index: 1; }
 
-    /* ===== BRAND HEADER ===== */
-    .brand-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 30px;
-      padding-bottom: 20px;
-      border-bottom: 1px solid var(--card-border);
-      flex-wrap: wrap;
-      gap: 15px;
-    }
+    .brand-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid var(--card-border); flex-wrap: wrap; gap: 15px; }
+    .brand-logo-area { display: flex; align-items: center; gap: 15px; }
+    .brand-logo { height: 48px; width: auto; filter: drop-shadow(0 0 20px rgba(2, 132, 199, 0.2)); transition: all 0.3s ease; }
+    .brand-logo:hover { filter: drop-shadow(0 0 30px rgba(2, 132, 199, 0.4)); }
+    .brand-text h1 { font-size: 22px; font-weight: 900; letter-spacing: -0.5px; background: linear-gradient(135deg, #ffffff, var(--accent-cyan), var(--accent-purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-family: 'Exo 2', sans-serif; }
+    .brand-text .subtitle { font-size: 11px; color: var(--text-muted); font-weight: 500; letter-spacing: 0.5px; font-family: 'Exo 2', sans-serif; }
+    .header-badges { display: flex; gap: 10px; flex-wrap: wrap; }
+    .badge-pelo, .badge-quantum, .badge-live { padding: 6px 14px; border-radius: 30px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display: inline-flex; align-items: center; gap: 6px; }
+    .badge-pelo { background: rgba(2, 132, 199, 0.15); color: var(--accent-cyan); border: 1px solid rgba(56, 189, 248, 0.3); font-family: 'Exo 2', sans-serif; }
+    .badge-quantum { background: rgba(139, 92, 246, 0.15); color: var(--accent-purple); border: 1px solid rgba(139, 92, 246, 0.3); font-family: 'JetBrains Mono', monospace; }
+    .badge-live { background: rgba(244, 63, 94, 0.15); color: var(--accent-rose); border: 1px solid rgba(244, 63, 94, 0.3); font-family: 'Exo 2', sans-serif; }
 
-    .brand-logo-area {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-    }
+    .nav-tabs { display: flex; gap: 8px; margin-bottom: 25px; background: rgba(15, 23, 42, 0.6); padding: 6px; border-radius: var(--radius-md); border: 1px solid var(--card-border); flex-wrap: wrap; }
+    .tab-btn { flex: 1; padding: 12px 16px; border: none; background: transparent; font-weight: 700; cursor: pointer; border-radius: var(--radius-sm); color: var(--text-secondary); transition: all 0.25s ease; font-size: 13px; min-width: 140px; display: flex; align-items: center; justify-content: center; gap: 8px; font-family: 'Exo 2', sans-serif; }
+    .tab-btn.active { background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple)); color: #ffffff; box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3); }
+    .tab-btn:hover:not(.active) { background: rgba(255, 255, 255, 0.05); color: var(--text-primary); }
 
-    .brand-logo {
-      height: 48px;
-      width: auto;
-      filter: drop-shadow(0 0 20px rgba(2, 132, 199, 0.2));
-      transition: all 0.3s ease;
-    }
+    .section-title { font-size: 15px; font-weight: 700; color: var(--text-primary); margin-top: 30px; margin-bottom: 18px; padding-bottom: 8px; border-bottom: 1px solid var(--card-border); display: flex; align-items: center; gap: 10px; text-transform: uppercase; letter-spacing: 0.5px; font-family: 'Exo 2', sans-serif; }
+    .section-title .count { font-size: 12px; font-weight: 500; color: var(--text-muted); text-transform: none; margin-left: auto; }
+    .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+    @media (max-width: 680px) { .form-grid { grid-template-columns: 1fr; } .container { padding: 20px 15px; } }
+    .form-group { margin-bottom: 18px; }
+    .form-group.full-width { grid-column: span 2; }
+    @media (max-width: 680px) { .form-group.full-width { grid-column: span 1; } }
+    label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 12px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; font-family: 'Exo 2', sans-serif; }
+    label .required { color: var(--accent-rose); }
+    input, select, textarea { width: 100%; padding: 12px 16px; border: 1px solid var(--input-border); border-radius: var(--radius-sm); box-sizing: border-box; font-size: 14px; color: var(--text-primary); background: var(--input-bg); transition: all 0.2s ease; font-family: 'Exo 2', sans-serif; }
+    select option { background: #0f172a; color: #ffffff; }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent-cyan); box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2); background: rgba(30, 41, 59, 0.9); }
+    #map { height: 260px; width: 100%; border-radius: var(--radius-sm); border: 1px solid var(--input-border); margin-top: 8px; overflow: hidden; }
 
-    .brand-logo:hover {
-      filter: drop-shadow(0 0 30px rgba(2, 132, 199, 0.4));
-    }
+    .btn-submit { width: 100%; padding: 16px; background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple)); color: #ffffff; border: none; border-radius: var(--radius-sm); font-weight: 700; font-size: 15px; cursor: pointer; margin-top: 20px; transition: all 0.2s ease; box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3); display: flex; align-items: center; justify-content: center; gap: 10px; font-family: 'Exo 2', sans-serif; }
+    .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4); }
+    .btn-demo { background: rgba(255, 255, 255, 0.05); color: var(--accent-cyan); border: 1px dashed rgba(56, 189, 248, 0.4); padding: 12px; border-radius: var(--radius-sm); cursor: pointer; font-size: 13px; font-weight: 600; margin-bottom: 25px; width: 100%; transition: all 0.2s ease; font-family: 'Exo 2', sans-serif; }
+    .btn-demo:hover { background: rgba(56, 189, 248, 0.1); }
 
-    .brand-text h1 {
-      font-size: 22px;
-      font-weight: 900;
-      letter-spacing: -0.5px;
-      background: linear-gradient(135deg, #ffffff, var(--accent-cyan), var(--accent-purple));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      font-family: 'Exo 2', sans-serif;
-    }
+    .action-bar { display: flex; gap: 12px; margin-top: 30px; margin-bottom: 15px; }
+    .btn-export, .btn-clear { flex: 1; padding: 10px 16px; border-radius: var(--radius-sm); cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 8px; border: none; font-family: 'Exo 2', sans-serif; }
+    .btn-export { background: rgba(16, 185, 129, 0.15); color: var(--accent-green); border: 1px solid rgba(16, 185, 129, 0.3); }
+    .btn-export:hover { background: rgba(16, 185, 129, 0.25); }
+    .btn-clear { background: rgba(244, 63, 94, 0.15); color: var(--accent-rose); border: 1px solid rgba(244, 63, 94, 0.3); }
+    .btn-clear:hover { background: rgba(244, 63, 94, 0.25); }
 
-    .brand-text .subtitle {
-      font-size: 11px;
-      color: var(--text-muted);
-      font-weight: 500;
-      letter-spacing: 0.5px;
-      font-family: 'Exo 2', sans-serif;
-    }
-
-    .header-badges {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .badge-pelo, .badge-quantum, .badge-live {
-      padding: 6px 14px;
-      border-radius: 30px;
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .badge-pelo {
-      background: rgba(2, 132, 199, 0.15);
-      color: var(--accent-cyan);
-      border: 1px solid rgba(56, 189, 248, 0.3);
-      font-family: 'Exo 2', sans-serif;
-    }
-
-    .badge-quantum {
-      background: rgba(139, 92, 246, 0.15);
-      color: var(--accent-purple);
-      border: 1px solid rgba(139, 92, 246, 0.3);
-      font-family: 'JetBrains Mono', monospace;
-    }
-
-    .badge-live {
-      background: rgba(244, 63, 94, 0.15);
-      color: var(--accent-rose);
-      border: 1px solid rgba(244, 63, 94, 0.3);
-      font-family: 'Exo 2', sans-serif;
-    }
-
-    /* ===== NAV TABS ===== */
-    .nav-tabs {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 25px;
-      background: rgba(15, 23, 42, 0.6);
-      padding: 6px;
-      border-radius: var(--radius-md);
-      border: 1px solid var(--card-border);
-      flex-wrap: wrap;
-    }
-
-    .tab-btn {
-      flex: 1;
-      padding: 12px 16px;
-      border: none;
-      background: transparent;
-      font-weight: 700;
-      cursor: pointer;
-      border-radius: var(--radius-sm);
-      color: var(--text-secondary);
-      transition: all 0.25s ease;
-      font-size: 13px;
-      min-width: 140px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      font-family: 'Exo 2', sans-serif;
-    }
-
-    .tab-btn.active {
-      background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
-      color: #ffffff;
-      box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
-    }
-
-    .tab-btn:hover:not(.active) {
-      background: rgba(255, 255, 255, 0.05);
-      color: var(--text-primary);
-    }
-
-    /* ===== SECTIONS & FORMS ===== */
-    .section-title {
-      font-size: 15px;
-      font-weight: 700;
-      color: var(--text-primary);
-      margin-top: 30px;
-      margin-bottom: 18px;
-      padding-bottom: 8px;
-      border-bottom: 1px solid var(--card-border);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      font-family: 'Exo 2', sans-serif;
-    }
-
-    .section-title .count {
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--text-muted);
-      text-transform: none;
-      margin-left: auto;
-    }
-
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 18px;
-    }
-
-    @media (max-width: 680px) {
-      .form-grid { grid-template-columns: 1fr; }
-      .container { padding: 20px 15px; }
-    }
-
-    .form-group {
-      margin-bottom: 18px;
-    }
-
-    .form-group.full-width {
-      grid-column: span 2;
-    }
-
-    @media (max-width: 680px) {
-      .form-group.full-width { grid-column: span 1; }
-    }
-
-    label {
-      display: block;
-      font-weight: 600;
-      margin-bottom: 8px;
-      font-size: 12px;
-      color: var(--text-secondary);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      font-family: 'Exo 2', sans-serif;
-    }
-
-    label .required {
-      color: var(--accent-rose);
-    }
-
-    input, select, textarea {
-      width: 100%;
-      padding: 12px 16px;
-      border: 1px solid var(--input-border);
-      border-radius: var(--radius-sm);
-      box-sizing: border-box;
-      font-size: 14px;
-      color: var(--text-primary);
-      background: var(--input-bg);
-      transition: all 0.2s ease;
-      font-family: 'Exo 2', sans-serif;
-    }
-
-    select option {
-      background: #0f172a;
-      color: #ffffff;
-    }
-
-    input:focus, select:focus, textarea:focus {
-      outline: none;
-      border-color: var(--accent-cyan);
-      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
-      background: rgba(30, 41, 59, 0.9);
-    }
-
-    #map {
-      height: 260px;
-      width: 100%;
-      border-radius: var(--radius-sm);
-      border: 1px solid var(--input-border);
-      margin-top: 8px;
-      overflow: hidden;
-    }
-
-    /* ===== BUTTONS ===== */
-    .btn-submit {
-      width: 100%;
-      padding: 16px;
-      background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
-      color: #ffffff;
-      border: none;
-      border-radius: var(--radius-sm);
-      font-weight: 700;
-      font-size: 15px;
-      cursor: pointer;
-      margin-top: 20px;
-      transition: all 0.2s ease;
-      box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      font-family: 'Exo 2', sans-serif;
-    }
-
-    .btn-submit:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
-    }
-
-    .btn-demo {
-      background: rgba(255, 255, 255, 0.05);
-      color: var(--accent-cyan);
-      border: 1px dashed rgba(56, 189, 248, 0.4);
-      padding: 12px;
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-      font-size: 13px;
-      font-weight: 600;
-      margin-bottom: 25px;
-      width: 100%;
-      transition: all 0.2s ease;
-      font-family: 'Exo 2', sans-serif;
-    }
-
-    .btn-demo:hover {
-      background: rgba(56, 189, 248, 0.1);
-    }
-
-    .action-bar {
-      display: flex;
-      gap: 12px;
-      margin-top: 30px;
-      margin-bottom: 15px;
-    }
-
-    .btn-export, .btn-clear {
-      flex: 1;
-      padding: 10px 16px;
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-      font-size: 13px;
-      font-weight: 600;
-      transition: all 0.2s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      border: none;
-      font-family: 'Exo 2', sans-serif;
-    }
-
-    .btn-export {
-      background: rgba(16, 185, 129, 0.15);
-      color: var(--accent-green);
-      border: 1px solid rgba(16, 185, 129, 0.3);
-    }
-
-    .btn-export:hover {
-      background: rgba(16, 185, 129, 0.25);
-    }
-
-    .btn-clear {
-      background: rgba(244, 63, 94, 0.15);
-      color: var(--accent-rose);
-      border: 1px solid rgba(244, 63, 94, 0.3);
-    }
-
-    .btn-clear:hover {
-      background: rgba(244, 63, 94, 0.25);
-    }
-
-    /* ===== STATS PANEL ===== */
-    .stats-panel {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 15px;
-      background: rgba(15, 23, 42, 0.8);
-      padding: 20px;
-      border-radius: var(--radius-md);
-      border: 1px solid var(--card-border);
-      margin-top: 30px;
-      text-align: center;
-    }
-
-    @media (max-width: 600px) {
-      .stats-panel { grid-template-columns: repeat(2, 1fr); }
-    }
-
-    .stat-val {
-      font-size: 22px;
-      font-weight: 800;
-      color: var(--accent-cyan);
-      font-family: 'JetBrains Mono', monospace;
-    }
-
+    .stats-panel { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; background: rgba(15, 23, 42, 0.8); padding: 20px; border-radius: var(--radius-md); border: 1px solid var(--card-border); margin-top: 30px; text-align: center; }
+    @media (max-width: 600px) { .stats-panel { grid-template-columns: repeat(2, 1fr); } }
+    .stat-val { font-size: 22px; font-weight: 800; color: var(--accent-cyan); font-family: 'JetBrains Mono', monospace; }
     .stat-val.green { color: var(--accent-green); }
+    .stat-lbl { font-size: 11px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; margin-top: 4px; font-family: 'Exo 2', sans-serif; }
 
-    .stat-lbl {
-      font-size: 11px;
-      color: var(--text-muted);
-      font-weight: 600;
-      text-transform: uppercase;
-      margin-top: 4px;
-      font-family: 'Exo 2', sans-serif;
-    }
+    #manifestOutput { display: none; font-family: 'JetBrains Mono', monospace; background: #020617; color: var(--accent-cyan); padding: 20px; border-radius: var(--radius-md); margin-top: 25px; border: 1px solid rgba(56, 189, 248, 0.2); box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.5); }
+    #entriesList { max-height: 220px; overflow-y: auto; margin-top: 10px; display: flex; flex-direction: column; gap: 8px; }
+    .entry-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: rgba(30, 41, 59, 0.4); border-radius: var(--radius-sm); font-size: 13px; border: 1px solid var(--card-border); border-left: 3px solid var(--accent-purple); }
+    .entry-item .entry-id { font-weight: 700; color: var(--text-primary); font-family: 'JetBrains Mono', monospace; }
+    .entry-item .entry-material { color: var(--text-secondary); }
+    .entry-item .entry-status { color: var(--accent-green); font-weight: 700; }
 
-    /* ===== MANIFEST OUTPUT & ENTRIES ===== */
-    #manifestOutput {
-      display: none;
-      font-family: 'JetBrains Mono', monospace;
-      background: #020617;
-      color: var(--accent-cyan);
-      padding: 20px;
-      border-radius: var(--radius-md);
-      margin-top: 25px;
-      border: 1px solid rgba(56, 189, 248, 0.2);
-      box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.5);
-    }
+    .offline-indicator { display: none; background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.3); color: var(--accent-amber); padding: 12px 18px; border-radius: var(--radius-sm); margin-bottom: 20px; font-size: 13px; font-weight: 600; align-items: center; gap: 10px; font-family: 'Exo 2', sans-serif; }
+    .offline-indicator.visible { display: flex; }
 
-    #entriesList {
-      max-height: 220px;
-      overflow-y: auto;
-      margin-top: 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .entry-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px 16px;
-      background: rgba(30, 41, 59, 0.4);
-      border-radius: var(--radius-sm);
-      font-size: 13px;
-      border: 1px solid var(--card-border);
-      border-left: 3px solid var(--accent-purple);
-    }
-
-    .entry-item .entry-id {
-      font-weight: 700;
-      color: var(--text-primary);
-      font-family: 'JetBrains Mono', monospace;
-    }
-
-    .entry-item .entry-material {
-      color: var(--text-secondary);
-    }
-
-    .entry-item .entry-status {
-      color: var(--accent-green);
-      font-weight: 700;
-    }
-
-    /* ===== OFFLINE INDICATOR ===== */
-    .offline-indicator {
-      display: none;
-      background: rgba(245, 158, 11, 0.15);
-      border: 1px solid rgba(245, 158, 11, 0.3);
-      color: var(--accent-amber);
-      padding: 12px 18px;
-      border-radius: var(--radius-sm);
-      margin-bottom: 20px;
-      font-size: 13px;
-      font-weight: 600;
-      align-items: center;
-      gap: 10px;
-      font-family: 'Exo 2', sans-serif;
-    }
-
-    .offline-indicator.visible {
-      display: flex;
-    }
-
-    /* ===== TOAST ===== */
-    .toast {
-      position: fixed;
-      bottom: 30px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #0f172a;
-      color: var(--text-primary);
-      padding: 14px 28px;
-      border-radius: 30px;
-      border: 1px solid var(--card-border);
-      box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-      font-weight: 600;
-      font-size: 13px;
-      z-index: 99999;
-      animation: slideUp 0.3s ease;
-      font-family: 'Exo 2', sans-serif;
-    }
-
+    .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #0f172a; color: var(--text-primary); padding: 14px 28px; border-radius: 30px; border: 1px solid var(--card-border); box-shadow: 0 10px 40px rgba(0,0,0,0.5); font-weight: 600; font-size: 13px; z-index: 99999; animation: slideUp 0.3s ease; font-family: 'Exo 2', sans-serif; }
     .toast.success { border-color: var(--accent-green); color: var(--accent-green); }
     .toast.error { border-color: var(--accent-rose); color: var(--accent-rose); }
+    @keyframes slideUp { from { opacity: 0; transform: translateX(-50%) translateY(20px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
 
-    @keyframes slideUp {
-      from { opacity: 0; transform: translateX(-50%) translateY(20px); }
-      to { opacity: 1; transform: translateX(-50%) translateY(0); }
-    }
+    .footer-credits { text-align: center; margin-top: 40px; font-size: 12px; color: var(--text-muted); border-top: 1px solid var(--card-border); padding-top: 25px; font-family: 'Exo 2', sans-serif; }
+    .footer-credits .quantum { font-family: 'JetBrains Mono', monospace; color: var(--accent-purple); letter-spacing: 0.5px; }
+    .footer-logos { display: flex; justify-content: center; align-items: center; gap: 30px; margin-bottom: 15px; flex-wrap: wrap; }
+    .footer-logo { height: 36px; width: auto; opacity: 0.6; transition: all 0.3s ease; filter: drop-shadow(0 0 10px rgba(2, 132, 199, 0.05)); }
+    .footer-logo:hover { opacity: 1; filter: drop-shadow(0 0 20px rgba(139, 92, 246, 0.15)); transform: scale(1.02); }
 
-    /* ===== FOOTER ===== */
-    .footer-credits {
-      text-align: center;
-      margin-top: 40px;
-      font-size: 12px;
-      color: var(--text-muted);
-      border-top: 1px solid var(--card-border);
-      padding-top: 25px;
-      font-family: 'Exo 2', sans-serif;
-    }
-
-    .footer-credits .quantum {
-      font-family: 'JetBrains Mono', monospace;
-      color: var(--accent-purple);
-      letter-spacing: 0.5px;
-    }
-
-    .footer-logos {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 30px;
-      margin-bottom: 15px;
-      flex-wrap: wrap;
-    }
-
-    .footer-logo {
-      height: 36px;
-      width: auto;
-      opacity: 0.6;
-      transition: all 0.3s ease;
-      filter: drop-shadow(0 0 10px rgba(2, 132, 199, 0.05));
-    }
-
-    .footer-logo:hover {
-      opacity: 1;
-      filter: drop-shadow(0 0 20px rgba(139, 92, 246, 0.15));
-      transform: scale(1.02);
-    }
-
-    /* ===== RESPONSIVE ===== */
-    @media (max-width: 680px) {
-      .brand-header { flex-direction: column; align-items: flex-start; }
-      .brand-logo-area { width: 100%; }
-      .header-badges { width: 100%; justify-content: flex-start; }
-      .brand-text h1 { font-size: 18px; }
-      .brand-logo { height: 40px; }
-    }
+    @media (max-width: 680px) { .brand-header { flex-direction: column; align-items: flex-start; } .brand-logo-area { width: 100%; } .header-badges { width: 100%; justify-content: flex-start; } .brand-text h1 { font-size: 18px; } .brand-logo { height: 40px; } }
+    
+    .handshake-badge { padding: 6px 14px; border-radius: 30px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display: inline-flex; align-items: center; gap: 6px; font-family: 'JetBrains Mono', monospace; border: 1px solid var(--accent-amber); color: var(--accent-amber); background: rgba(245, 158, 11, 0.08); transition: all 0.3s; }
+    .handshake-badge.confirmed { border-color: var(--accent-green); color: var(--accent-green); background: rgba(16, 185, 129, 0.08); }
+    .handshake-badge.unreachable { border-color: var(--accent-rose); color: var(--accent-rose); background: rgba(244, 63, 94, 0.08); }
   </style>
 </head>
 <body>
 
-<!-- ===== QUANTUM PARTICLES ===== -->
 <div id="particles-js"></div>
 
 <div class="container">
   
-  <!-- ===== BRAND HEADER ===== -->
   <div class="brand-header">
     <div class="brand-logo-area">
       <img src="https://i.postimg.cc/zXW78GNH/Mind-Tech-Transparent-Logo.png" alt="MindTech Industries" class="brand-logo" onerror="this.style.display='none'">
@@ -597,18 +148,16 @@
     </div>
     <div class="header-badges">
       <div class="badge-pelo">Master Engine</div>
-      <div class="badge-quantum">⚛️ CHSH S=2.76</div>
+      <span id="handshakeBadge" class="handshake-badge"><i class="fas fa-satellite-dish"></i> Handshake: Pending...</span>
       <div class="badge-live" id="statusBadge">🔴 OFFLINE</div>
     </div>
   </div>
 
-  <!-- ===== OFFLINE INDICATOR ===== -->
   <div class="offline-indicator" id="offlineIndicator">
     <i class="fa-solid fa-wifi"></i>
     <span id="offlineText">You are offline — data will be saved locally and synced when online</span>
   </div>
 
-  <!-- ===== NAVIGATION TABS ===== -->
   <div class="nav-tabs">
     <button type="button" class="tab-btn active" id="tab-comm" onclick="switchView('community')">
       <i class="fa-solid fa-earth-africa"></i> Community Network
@@ -625,12 +174,10 @@
     <i class="fa-solid fa-bolt"></i> Pre-load Master Test Payload
   </button>
 
-  <!-- ===== MAIN FORM ===== -->
   <form id="unifiedPeloForm">
     <input type="hidden" id="mode" value="community" />
     <input type="hidden" id="gpsCoordinates" value="" />
 
-    <!-- SHARED MATERIAL SELECTOR -->
     <div class="form-group">
       <label for="wasteType">Material Classification <span class="required">*</span></label>
       <select id="wasteType" required>
@@ -645,7 +192,6 @@
       </select>
     </div>
 
-    <!-- COMMUNITY FIELDS -->
     <div id="community-fields">
       <div class="form-grid">
         <div class="form-group">
@@ -706,7 +252,6 @@
       </div>
     </div>
 
-    <!-- INDUSTRIAL FIELDS -->
     <div id="industrial-fields" style="display:none;">
       <div class="form-grid">
         <div class="form-group">
@@ -728,7 +273,6 @@
       </div>
     </div>
 
-    <!-- MINDTECH VERIFICATION FIELDS -->
     <div id="mindtech-fields" style="display:none;">
       <div class="form-grid">
         <div class="form-group">
@@ -759,10 +303,8 @@
     </button>
   </form>
 
-  <!-- ===== MANIFEST OUTPUT ===== -->
   <div id="manifestOutput"></div>
 
-  <!-- ===== ACTION BAR ===== -->
   <div class="action-bar">
     <button class="btn-export" onclick="exportCSV()">
       <i class="fas fa-file-export"></i> Export CSV
@@ -772,10 +314,8 @@
     </button>
   </div>
 
-  <!-- ===== ENTRIES LIST ===== -->
   <div id="entriesList"></div>
 
-  <!-- ===== IMPACT STATS ===== -->
   <div class="stats-panel">
     <div>
       <div class="stat-val" id="statLitres">0</div>
@@ -795,7 +335,6 @@
     </div>
   </div>
 
-  <!-- ===== FOOTER ===== -->
   <div class="footer-credits">
     <div class="footer-logos">
       <img src="https://i.postimg.cc/zXW78GNH/Mind-Tech-Transparent-Logo.png" alt="MindTech Industries" class="footer-logo" onerror="this.style.display='none'">
@@ -813,10 +352,61 @@
 <!-- Leaflet JS -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
+<!-- ============================================================ -->
+<!-- DEFENSIVE HANDSHAKE — DIRECT FETCH -->
+<!-- ============================================================ -->
 <script>
-// ============================================================
-// PARTICLES.JS — QUANTUM BACKGROUND
-// ============================================================
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log('[Handshake] Script loaded, waiting for DOM...');
+    const badge = document.getElementById('handshakeBadge');
+    if (!badge) {
+      console.error('[Handshake] ❌ #handshakeBadge not found');
+      return;
+    }
+    console.log('[Handshake] Badge found, starting fetch...');
+    badge.className = 'handshake-badge';
+    badge.innerHTML = '<i class="fas fa-satellite-dish"></i> Handshake: Pending...';
+
+    (async function runHandshake() {
+      try {
+        try {
+          await fetch('https://pelo-complete.onrender.com/health', {
+            method: 'GET',
+            signal: AbortSignal.timeout(5000)
+          });
+        } catch (e) {
+          console.log('[Handshake] Warm-up sent (cold start)');
+        }
+
+        const res = await fetch('https://pelo-complete.onrender.com/api/v1/verify/chsh', {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+          signal: AbortSignal.timeout(30000)
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          console.log('[Handshake] ✅ CHSH Confirmed:', data.S);
+          badge.className = 'handshake-badge confirmed';
+          badge.innerHTML = `<i class="fas fa-check-circle"></i> Handshake: CONFIRMED (S=${data.S || 2.76})`;
+        } else {
+          console.warn('[Handshake] ⚠️ Verifier returned', res.status);
+          badge.className = 'handshake-badge unreachable';
+          badge.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Handshake: UNREACHABLE';
+        }
+      } catch (error) {
+        console.warn('[Handshake] ⚠️ Verifier unreachable:', error.message);
+        badge.className = 'handshake-badge unreachable';
+        badge.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Handshake: UNREACHABLE';
+      }
+    })();
+  });
+</script>
+
+<!-- ============================================================ -->
+<!-- MAIN APP LOGIC -->
+<!-- ============================================================ -->
+<script>
 particlesJS('particles-js', {
   particles: {
     number: { value: 60, density: { enable: true, value_area: 1000 } },
@@ -833,9 +423,6 @@ particlesJS('particles-js', {
   retina_detect: true
 });
 
-// ============================================================
-// FIREBASE CONFIG
-// ============================================================
 const firebaseConfig = {
   apiKey: "AIzaSyD5OB59lG6bAsmQ7A97zXP_MfQ5AM3BYaw",
   authDomain: "mindflow-ai-education.firebaseapp.com",
@@ -849,11 +436,9 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 db.settings({ cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED });
 db.enablePersistence({ synchronizeTabs: true }).catch(() => {});
-
 const auth = firebase.auth();
 auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
 
-// QUANTUM STATE
 const QUANTUM_STATE = {
   chsh: 2.76,
   patent: 'SA 2026/05142',
@@ -861,13 +446,11 @@ const QUANTUM_STATE = {
   timestamp: new Date().toISOString()
 };
 
-// STATE
 let entries = [];
 let map = null;
 let marker = null;
 let isOffline = !navigator.onLine;
 
-// DOM REFS
 const modeInput = document.getElementById('mode');
 const wasteType = document.getElementById('wasteType');
 const gpsCoords = document.getElementById('gpsCoordinates');
@@ -879,7 +462,6 @@ const offlineIndicator = document.getElementById('offlineIndicator');
 const offlineText = document.getElementById('offlineText');
 const entriesList = document.getElementById('entriesList');
 
-// MAP INITIALIZATION
 function initMap() {
   map = L.map('map').setView([-26.2041, 28.0473], 10);
   L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
@@ -897,7 +479,6 @@ function initMap() {
   });
 }
 
-// VIEW SWITCHER
 function switchView(view) {
   modeInput.value = view;
   ['comm', 'ind', 'mindtech'].forEach(t => 
@@ -919,7 +500,6 @@ function switchView(view) {
   }
 }
 
-// DEMO DATA
 function fillDemoData() {
   const mode = modeInput.value;
   if (mode === 'community') {
@@ -947,7 +527,6 @@ function fillDemoData() {
   }
 }
 
-// TOAST SYSTEM
 function showToast(msg, type = 'info') {
   const existing = document.querySelector('.toast');
   if (existing) existing.remove();
@@ -962,7 +541,6 @@ function showToast(msg, type = 'info') {
   }, 4000);
 }
 
-// UPDATE STATS
 function updateStats() {
   const totalOil = entries.reduce((sum, e) => sum + (parseFloat(e.declaredQty) || 0), 0);
   const totalSites = entries.length;
@@ -978,7 +556,6 @@ function updateStats() {
   renderEntries();
 }
 
-// RENDER ENTRIES
 function renderEntries() {
   if (entries.length === 0) {
     entriesList.innerHTML = '<p style="color:var(--text-muted); font-size:13px; text-align:center; padding:10px;">No ledger entries yet</p>';
@@ -999,14 +576,12 @@ function renderEntries() {
   entriesList.innerHTML = html;
 }
 
-// GENERATE MANIFEST ID
 function generateManifestId() {
   const timestamp = Date.now();
   const random = Math.floor(Math.random() * 10000);
   return `MNF-${timestamp}-${random.toString().padStart(4, '0')}`;
 }
 
-// SUBMIT TO FIRESTORE
 async function submitToFirestore(entry, retries = 3) {
   let lastError;
   for (let attempt = 1; attempt <= retries; attempt++) {
@@ -1033,7 +608,6 @@ async function submitToFirestore(entry, retries = 3) {
   return { success: false, error: lastError.message };
 }
 
-// FORM SUBMISSION
 document.getElementById('unifiedPeloForm').addEventListener('submit', async function(e) {
   e.preventDefault();
   
@@ -1117,7 +691,6 @@ document.getElementById('unifiedPeloForm').addEventListener('submit', async func
   submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Submit Payload to Master Ledger';
 });
 
-// EXPORT CSV
 function exportCSV() {
   if (entries.length === 0) {
     showToast('⚠️ No entries to export.', 'error');
@@ -1151,7 +724,6 @@ function exportCSV() {
   showToast('📊 CSV exported successfully!', 'success');
 }
 
-// CLEAR ALL
 function clearAllEntries() {
   if (entries.length === 0) return;
   if (confirm('Delete ALL entries? This cannot be undone.')) {
@@ -1162,7 +734,6 @@ function clearAllEntries() {
   }
 }
 
-// OFFLINE MONITORING
 function updateOfflineStatus() {
   isOffline = !navigator.onLine;
   if (isOffline) {
@@ -1181,7 +752,6 @@ function updateOfflineStatus() {
 window.addEventListener('online', updateOfflineStatus);
 window.addEventListener('offline', updateOfflineStatus);
 
-// INIT
 document.addEventListener('DOMContentLoaded', function() {
   initMap();
   updateOfflineStatus();
