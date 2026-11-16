@@ -94,6 +94,19 @@
     .handshake-badge { padding: 6px 14px; border-radius: 30px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display: inline-flex; align-items: center; gap: 6px; font-family: 'JetBrains Mono', monospace; border: 1px solid var(--accent-amber); color: var(--accent-amber); background: rgba(245, 158, 11, 0.08); transition: all 0.3s; }
     .handshake-badge.confirmed { border-color: var(--accent-green); color: var(--accent-green); background: rgba(16, 185, 129, 0.08); }
     .handshake-badge.unreachable { border-color: var(--accent-rose); color: var(--accent-rose); background: rgba(244, 63, 94, 0.08); }
+
+    /* PRIVACY MODAL */
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); z-index: 10000; align-items: center; justify-content: center; padding: 20px; }
+    .modal.active { display: flex; }
+    .modal-content { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius-lg); padding: 30px; max-width: 700px; width: 100%; max-height: 80vh; overflow-y: auto; }
+    .modal-content h2 { font-size: 1.4rem; color: var(--accent-cyan); margin-bottom: 15px; }
+    .modal-content h3 { font-size: 1rem; color: var(--accent-purple); margin: 18px 0 8px; }
+    .modal-content p, .modal-content li { font-size: 0.85rem; line-height: 1.7; color: var(--text-secondary); margin-bottom: 8px; }
+    .modal-content ul { margin-left: 1.5em; margin-bottom: 12px; }
+    .modal-close { float: right; background: none; border: none; color: var(--text-muted); font-size: 24px; cursor: pointer; }
+    .modal-close:hover { color: var(--accent-rose); }
+    .footer-link { color: var(--accent-cyan); text-decoration: none; font-weight: 600; cursor: pointer; }
+    .footer-link:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
@@ -101,7 +114,7 @@
 <div id="particles-js"></div>
 
 <div class="container">
-  
+
   <div class="brand-header">
     <div class="brand-logo-area">
       <img src="https://i.postimg.cc/zXW78GNH/Mind-Tech-Transparent-Logo.png" alt="MindTech Industries" class="brand-logo" onerror="this.style.display='none'">
@@ -310,26 +323,69 @@
     <div style="margin-top:4px; font-size:11px; color:var(--text-muted);">
       All data flows to: mindtech.industriesai@gmail.com
     </div>
+    <div style="margin-top:8px; font-size:11px;">
+      <a class="footer-link" onclick="openPrivacyModal()">Privacy Notice · POPIA Compliance</a>
+    </div>
+  </div>
+</div>
+
+<!-- PRIVACY NOTICE MODAL -->
+<div id="privacyModal" class="modal">
+  <div class="modal-content">
+    <button class="modal-close" onclick="closePrivacyModal()">✕</button>
+    <h2>Privacy Notice & POPIA Compliance</h2>
+    <p><strong>Last updated:</strong> 16 November 2026</p>
+
+    <h3>1. What We Collect</h3>
+    <p>When you submit a waste management entry, we collect: your name, phone number, email address, area/community, GPS coordinates (if you drop a pin), waste type, volume, and any community safety contacts you provide (WhatsApp group, security company).</p>
+
+    <h3>2. Why We Collect It</h3>
+    <p>This data is used to:</p>
+    <ul>
+      <li>Issue a quantum-verified certificate of collection.</li>
+      <li>Anchor the certificate to the PELO master ledger.</li>
+      <li>Provide an immutable audit trail for regulators, auditors, and the community.</li>
+      <li>Coordinate waste collection and recycling logistics.</li>
+    </ul>
+
+    <h3>3. Where It Is Stored</h3>
+    <p>All data is stored in <strong>Google Cloud Firestore</strong>, in the <strong>US-East (Oregon)</strong> region. Google Cloud is a third-party operator. Data is not sold, and it is not used to train any AI model.</p>
+
+    <h3>4. Cross-Border Transfer (POPIA Section 72)</h3>
+    <p>Because the data is stored in the United States, this constitutes a cross-border transfer of personal information. The transfer relies on the <strong>Google Cloud Data Processing Addendum</strong>, which provides binding data protection obligations consistent with POPIA.</p>
+
+    <h3>5. How Long We Keep It</h3>
+    <p>Data is retained for <strong>365 days</strong> for audit and compliance purposes, after which it is anonymised or deleted.</p>
+
+    <h3>6. Your Rights</h3>
+    <p>Under POPIA, you have the right to:</p>
+    <ul>
+      <li>Request access to the data we hold about you.</li>
+      <li>Request correction or deletion of your data.</li>
+      <li>Object to the processing of your data.</li>
+    </ul>
+    <p>To exercise these rights, contact us at <strong>privacy@mindtech.industries</strong>.</p>
+
+    <h3>7. Consent</h3>
+    <p>By submitting an entry, you consent to your data being stored and processed as described in this notice. You can withdraw consent at any time by contacting us.</p>
+
+    <h3>8. Security</h3>
+    <p>All data is signed with a quantum-verified RSA-PSS-SHA256 signature and anchored to an immutable ledger. The certificate hash is recomputable from the record using SHA-256 over the canonical JSON serialisation.</p>
   </div>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-<!-- DEFENSIVE HANDSHAKE -->
+<!-- HANDSHAKE -->
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    console.log('[Handshake] Script loaded, waiting for DOM...');
     const badge = document.getElementById('handshakeBadge');
-    if (!badge) { console.error('[Handshake] ❌ #handshakeBadge not found'); return; }
-    console.log('[Handshake] Badge found, starting fetch...');
-    badge.className = 'handshake-badge';
+    if (!badge) return;
     badge.innerHTML = '<i class="fas fa-satellite-dish"></i> Handshake: Pending...';
 
     (async function runHandshake() {
       try {
-        try {
-          await fetch('https://pelo-complete-bm8s.onrender.com/health', { method: 'GET', signal: AbortSignal.timeout(15000) });
-        } catch (e) { console.log('[Handshake] Warm-up sent (cold start)'); }
+        await fetch('https://pelo-complete-bm8s.onrender.com/health', { method: 'GET', signal: AbortSignal.timeout(15000) }).catch(() => {});
 
         const res = await fetch('https://pelo-complete-bm8s.onrender.com/api/v1/verify/chsh', {
           method: 'GET',
@@ -340,21 +396,25 @@
         if (res.ok) {
           const data = await res.json();
           const sValue = data.canonical_anchor ? data.canonical_anchor.chsh_s : 2.76;
-          console.log('[Handshake] ✅ CHSH Confirmed:', sValue);
           badge.className = 'handshake-badge confirmed';
           badge.innerHTML = `<i class="fas fa-check-circle"></i> Handshake: CONFIRMED (S=${sValue})`;
         } else {
-          console.warn('[Handshake] ⚠️ Verifier returned', res.status);
           badge.className = 'handshake-badge unreachable';
           badge.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Handshake: UNREACHABLE';
         }
       } catch (error) {
-        console.warn('[Handshake] ⚠️ Verifier unreachable:', error.message);
         badge.className = 'handshake-badge unreachable';
         badge.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Handshake: UNREACHABLE';
       }
     })();
   });
+
+  function openPrivacyModal() {
+    document.getElementById('privacyModal').classList.add('active');
+  }
+  function closePrivacyModal() {
+    document.getElementById('privacyModal').classList.remove('active');
+  }
 </script>
 
 <!-- MAIN APP LOGIC -->
@@ -659,11 +719,9 @@ document.addEventListener('DOMContentLoaded', function() {
   if (saved) {
     try { entries = JSON.parse(saved); updateStats(); } catch(e) {}
   }
-  console.log('🚀 MindTech Waste Management Engine v2.0');
+  console.log('🚀 MindTech Waste Management Engine v2.1');
   console.log('   ⚛️ QUANTUM BACKEND: CHSH S=2.76 · SA 2026/05142');
-  console.log('   📧 ALL data flows to: mindtech.industriesai@gmail.com');
-  console.log('   🔐 Quantum-verified chain-of-custody');
-  console.log('   🌍 Built in Africa, for Africa');
+  console.log('   🔐 Privacy Notice · POPIA Compliance active');
 });
 </script>
 
